@@ -1,0 +1,31 @@
+---
+import Layout from "../layouts/Page.astro";
+import { SITE_TITLE, SITE_DESCRIPTION } from "../consts";
+import LatestPosts from "../components/LatestPosts.astro";
+import { Image } from "astro:assets";
+import heroImage from "../../public/placeholder-social.jpg";
+---
+
+<Layout title={SITE_TITLE} description={SITE_DESCRIPTION}>
+  <Image
+    width={668}
+    src={heroImage}
+    alt="Astro Engineering Blog template: Multiple authors, co-authoring, topics, search, and more"
+  />
+  <h1>{SITE_TITLE}</h1>
+  <p>
+    Welcome to the Engineering Blog Starter template for <a
+      href="https://astro.build/">Astro</a
+    >. This template serves as a starting point for engineering blogs with
+    multiple contributors.
+  </p>
+  <p>
+    Have fun! If you get stuck, remember to <a href="https://docs.astro.build/"
+      >read the docs</a
+    > or <a href="https://astro.build/chat">join us on Discord</a> to ask questions.
+  </p>
+  <p>
+    This theme was made by <a href="https://eddyvinck.com/">Eddy Vinck</a>.
+  </p>
+  <LatestPosts />
+</Layout>
