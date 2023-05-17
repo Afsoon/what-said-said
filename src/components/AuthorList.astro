@@ -43,10 +43,9 @@ const renderAuthors = authors === "all" ? allauthors : authorsFromProps;
         .map((author) => {
           if (!author || !author.slug) return null;
           return (
-            <li>
+            <li class="list-none max-w-md mx-auto">
               <AuthorInfo
                 authorId={author.slug}
-                showPosts={showPosts}
                 headingLevel={headingLevel}
               />
             </li>

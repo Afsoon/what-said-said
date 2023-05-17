@@ -6,6 +6,7 @@ authors:
 description: "How to get started with your new engineering blog"
 pubDate: "April 24 2023"
 heroImage: "/img/readme.jpg"
+draft: true
 ---
 
 # Astro Starter Kit: Engineering Blog
