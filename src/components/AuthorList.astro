@@ -1,6 +1,9 @@
 ---
 import { getCollection, getEntryBySlug } from "astro:content";
 import AuthorInfo from "./AuthorInfo.astro";
+import { getLangFromUrl } from '../i18n/utils';
+
+const lang = getLangFromUrl(Astro.url);
 
 /**
  * This component expects either a list of authors as a prop, or an explicit 'all' to render all authors.
@@ -19,18 +22,17 @@ export interface Props {
 const {
   class: className = "",
   authors = [],
-  showPosts = false,
   headingLevel = 2,
 } = Astro.props;
 
 let authorsFromProps = undefined;
 if (authors !== "all") {
   authorsFromProps = await Promise.all(
-    authors.map((author) => getEntryBySlug("author", author))
+    authors.map((author) => getEntryBySlug("author", `${lang}/${author}`))
   );
 }
 
-const allauthors = await getCollection("author");
+const allauthors = await getCollection("author", (entry) => entry.slug.startsWith(lang));
 
 const renderAuthors = authors === "all" ? allauthors : authorsFromProps;
 ---

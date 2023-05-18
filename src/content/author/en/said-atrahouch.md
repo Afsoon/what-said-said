@@ -1,7 +1,7 @@
 ---
 firstname: Said
 lastname: Atrahouch
-avatar: "../../assets/images/author/profile.jpg" # will resolve to "src/content/assets/authors/{author}.jpg"
+avatar: "../../../assets/images/author/profile.jpg" # will resolve to "src/content/assets/authors/{author}.jpg"
 linkedin: https://www.linkedin.com/in/said-atrahouch/
 github: https://github.com/Afsoon
 ---

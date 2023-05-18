@@ -1,5 +1,6 @@
 ---
 import type { HTMLAttributes } from "astro/types";
+import { getLangFromUrl } from '../i18n/utils';
 
 type Props = HTMLAttributes<"a">;
 
@@ -7,11 +8,13 @@ const { href, class: className, ...props } = Astro.props;
 
 const { pathname } = Astro.url;
 const isActive = href === pathname || href === pathname.replace(/\/$/, "");
+
+const lang = getLangFromUrl(Astro.url);
 ---
 
 <li class="group relative">
   <a
-    href={href}
+    href={`/${lang}${href}`}
     class:list={[
       "inline-block hover:underline text-white flex items-center",
       className,

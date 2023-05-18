@@ -8,6 +8,7 @@ import {
   onMount,
 } from "solid-js";
 import { PostListItem } from "./PostListItem";
+import { useTranslations } from '../i18n/utils';
 
 const options = {
   keys: ["data.title", "data.description", "slug"],
@@ -18,10 +19,12 @@ const options = {
 
 type Props = {
   searchList: CollectionEntry<"blog">[];
+  lang: string;
 };
 
-export default function Search({ searchList }: Props) {
+export default function Search({ searchList, lang }: Props) {
   const fuse = new Fuse(searchList, options);
+  const t = useTranslations(lang as 'es' | 'en');
 
   const [query, setQuery] = createSignal("");
 
@@ -56,7 +59,7 @@ export default function Search({ searchList }: Props) {
         for="default-search"
         class="sr-only mb-2 text-sm font-medium text-gray-900 dark:text-white"
       >
-        Search
+        {t('nav.search')}
       </label>
       <div class="relative">
         <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
@@ -90,7 +93,7 @@ export default function Search({ searchList }: Props) {
         <ul class="grid list-none gap-6 p-0">
           {posts().map((post) => (
             <li class="p-0">
-              <PostListItem post={post} />
+              <PostListItem lang={lang} post={post} />
             </li>
           ))}
         </ul>

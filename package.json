@@ -8,7 +8,7 @@
     "url": "https://github.com/EddyVinck/astro-engineering-blog.git"
   },
   "scripts": {
-    "dev": "astro dev",
+    "dev": "NODE_OPTIONS='--inspect' astro dev",
     "start": "astro dev",
     "build": "astro build",
     "preview": "astro preview",

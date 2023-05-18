@@ -1,17 +1,33 @@
 ---
-import Layout from "../../layouts/Page.astro";
+import Layout from "../../../layouts/Page.astro";
 import { CollectionEntry, getCollection } from "astro:content";
 import type { GetStaticPaths, Page } from "astro";
-import PostList from "../../components/PostList.astro";
-import { PAGINATION_POSTS_PER_PAGE } from "../../consts";
+import PostList from "../../../components/PostList.astro";
+import { PAGINATION_POSTS_PER_PAGE } from "../../../consts";
 
 export const getStaticPaths: GetStaticPaths = async ({ paginate }) => {
-  const posts = (await getCollection("blog"))
+  const enPosts = (await getCollection("blog", (entry) => entry.slug.startsWith('en')))
     .filter((post) => post.data.draft === false)
     .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
-  return paginate(posts, {
+
+  const esPosts = (await getCollection("blog", (entry) => entry.slug.startsWith('es')))
+    .filter((post) => post.data.draft === false)
+    .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+
+  return [
+    paginate(enPosts, {
+      pageSize: PAGINATION_POSTS_PER_PAGE,
+      params: {
+        lang: 'en'
+      }
+    }),
+    paginate(esPosts, {
     pageSize: PAGINATION_POSTS_PER_PAGE,
-  });
+    params: {
+      lang: 'es'
+    }
+  })
+  ];
 };
 
 export type Props = {

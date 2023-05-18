@@ -1,13 +1,15 @@
 ---
 import type { HTMLAttributes } from "astro/types";
 import HeaderLink from "./HeaderLink.astro";
+import { getLangFromUrl } from '../i18n/utils';
 
 type Props = HTMLAttributes<"a">;
 
 const { href } = Astro.props;
 const className = Astro.props.class ? ` ${Astro.props.class}` : "";
+const lang = getLangFromUrl(Astro.url);
 ---
 
-<HeaderLink href={href} class={"py-2 w-full" + className}>
+<HeaderLink href={`/${lang}/${href}`} class={"py-2 w-full" + className}>
   <slot />
 </HeaderLink>

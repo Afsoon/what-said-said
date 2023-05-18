@@ -1,18 +1,21 @@
 ---
 import { CollectionEntry, getCollection } from "astro:content";
 import { PostListItem } from "./PostListItem";
+import { getLangFromUrl } from '../i18n/utils';
 
 type Props = {
   post: CollectionEntry<"blog">;
 };
 
+const { lang = getLangFromUrl(Astro.url) } = Astro.params;
 const { post } = Astro.props;
 const { data } = post;
 const { authors: authorIds } = data;
 
-const authorData = await getCollection("author");
+const authorData = await getCollection("author", (entry) => entry.slug.startsWith(lang));
+
 const authors = authorData
-  .filter((author) => authorIds.includes(author.slug))
+  .filter((author) => authorIds.includes(`${lang}/${author.slug}`))
   .map(
     (author) =>
       `${author.data.firstname}${
@@ -29,4 +32,4 @@ const finalPost: CollectionEntry<"blog"> = {
 };
 ---
 
-<PostListItem post={finalPost} />
+<PostListItem lang={lang} post={finalPost} />
