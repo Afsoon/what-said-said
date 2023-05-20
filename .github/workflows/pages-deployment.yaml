@@ -25,4 +25,3 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           projectName: 'what-said-said'
           directory: 'dist'
-          gitHubToken: ${{ github.token }}
