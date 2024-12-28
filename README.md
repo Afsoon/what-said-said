@@ -4,7 +4,7 @@ The blog is going to be mostly about topics I'm learning in my spare time or at 
 
 | Date | Topic | Title | Summary |
 |-|-|-|-|
-| 2024-28-12 | Blogging | (Why Blog?)[./posts/2024_28_12_why_blog.md] | A introductory post that explain the goal expected |
+| 2024-28-12 | Blogging | [Why Blog?](./posts/2024_28_12_why_blog.md) | A introductory post that explain the goal expected |
 
 
 
