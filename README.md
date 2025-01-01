@@ -5,12 +5,13 @@ The blog is going to be mostly about topics I'm learning in my spare time or at 
 | Date | Topic | Title |
 |-|-|-|
 | 2024-28-12 | Blogging | [Why Blog?](./posts/2024_28_12_why_blog.md)
+| 2025-01-01 | Blogging | [My learning goals in 2025](./posts/2025_01_01_my_learning_goals_in_2025.md)
 
 
 
 ## Disclaimer
 
-The content is made to be my knowledge wiki, I'm not intended to adapt content to be SEO adapted. 
+The content is made to journal my learning. 
 
 ## Feedback
 
