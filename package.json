@@ -1,0 +1,50 @@
+{
+  "name": "what-said-said",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Afsoon/what-said-said.git"
+  },
+  "license": "Apache-2.0",
+  "author": "Said Atrahouch",
+  "private": true,
+  "version": "0.0.0",
+  "description": "My blog to journal my learning",
+  "keywords": [
+    "blog"
+  ],
+  "homepage": "https://github.com/Afsoon/what-said-said#readme",
+  "bugs": {
+    "url": "https://github.com/Afsoon/what-said-said/issues"
+  },
+  "targets": {
+    "react-static": {
+      "source": [
+        "src/pages/*",
+        "src/pages/**/*"
+      ],
+      "context": "react-server",
+      "includeNodeModules": {
+        "tree-sitter-highlight": false
+      }
+    }
+  },
+  "scripts": {
+    "start": "parcel",
+    "build": "parcel build"
+  },
+  "dependencies": {
+    "@hpcc-js/wasm-graphviz": "^1.11.0",
+    "@parcel/rsc": "^2.15.4",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "tree-sitter-highlight": "^1.0.1"
+  },
+  "devDependencies": {
+    "@parcel/packager-react-static": "^2.15.4",
+    "@parcel/transformer-react-static": "^2.15.4",
+    "@types/react": "^19.1.10",
+    "@types/react-dom": "^19.1.7",
+    "parcel": "^2.15.4",
+    "typescript": "^5.9.2"
+  }
+}
