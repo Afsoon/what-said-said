@@ -37,7 +37,8 @@
     "@parcel/rsc": "^2.15.4",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
-    "tree-sitter-highlight": "^1.0.1"
+    "tree-sitter-highlight": "^1.0.1",
+    "wrangler": "^4.31.0"
   },
   "devDependencies": {
     "@parcel/packager-react-static": "^2.15.4",
