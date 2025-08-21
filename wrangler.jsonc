@@ -3,7 +3,7 @@
   "compatibility_date": "2025-03-21",
   // Enable Node.js compatibility so that AsyncLocalStorage works.
   "compatibility_flags": ["nodejs_compat"],
-  // "main": "dist/server.js", Not need for now
+  "main": "./worker/index.js",
   // Parcel will do the bundling. We don't need wrangler's default bundling.
   "no_bundle": true,
   // Serve the dist dir as static assets.
@@ -15,12 +15,4 @@
     "directory": "./dist",
     "binding": "ASSETS",
   },
-  // Include all JS modules in the dist dir in the worker, not just the main entrypoint.
-  "base_dir": "dist",
-  "rules": [
-    {
-      "type": "ESModule",
-      "globs": ["**/*.js"],
-    },
-  ],
 }
