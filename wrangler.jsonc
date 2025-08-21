@@ -16,4 +16,10 @@
     "directory": "./dist",
     "binding": "ASSETS",
   },
+  "routes": [
+    {
+      "pattern": "whatsaidsaid.com",
+      "custom_domain": true,
+    },
+  ],
 }
