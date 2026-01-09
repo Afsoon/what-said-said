@@ -27,10 +27,8 @@ export default function Layout({ children, pages, currentPage }: LayoutProps) {
 				/>
 				<meta
 					property="og:url"
-					content={`https://devongovett.me${currentPage.url}`}
+					content={`https://whatsaidsaid.com${currentPage.url}`}
 				/>
-				<meta name="twitter:card" content="summary" />
-				<meta name="twitter:site" content="@devongovett" />
 			</head>
 			<body>
 				<header>

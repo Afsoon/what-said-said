@@ -1,0 +1,56 @@
+import Layout from '../../components/MDXLayout';
+export default Layout;
+
+export const description = 'How I went from a novel Typescript user to be more profeciency on it';
+export const date = '2026-01-09';
+export const updated_at = null;
+export const tag = ["Blogging"];
+
+# My Typescript Journey
+
+## Journey
+
+### Streamloots and Mattermost (2021-2023)
+
+I have been using Typescript since 2021. When I started, I learned by the hard way without to much guidance. I barely grasped concepts likne `Union types` or the difference between `String and string`. I could help with the typescript migration.
+
+By late 2021, I aimed to be more profecient in Typescript. I was tired trying to understand TypeScript errors, fighting the compiler. The turning point came when I discovered `type programming`. Learning about it was eye-opening, the limit was the sky.
+
+After weeks reading articles and solving challenges from the [Type Challenges repository](https://github.com/type-challenges/type-challenges), I proposed to give an internal talk about a type programmin with typescript. The talk was an introduction, but it was enough to blew their minds, they really enjoyed it. Here is a non exhaustive list of concepts given during the internal talk:
+
+- `extends`.
+- Mapped Types.
+- String template using types.
+- Building the `Omit` utility.
+- Building a `toCamelCase` utility.
+
+After this talk, I became __the expert__. After this point I was the person to ask about TypeScript, part of thoses questions were easy and others I had to jump in a call to help them.
+
+I was able to deliver some Typescript utilities that reduced the boilerplate to type React Componentes, show them non well known React utilities like `ComponentProps`. From the backend perspective, I reviewed the payment refactor to eliminate the use of `as`, so any rename or deletion properties can be know ahead of time.
+
+The next point was on how we processed batches of events. We processd event as many times as sub-events instead of once. The reason was the subtyping not working properly. I partially fixed with intermediate types, **but** then the layoff news came in June of 2022.
+
+In August of 2022 I started in Mattermost, my ternure was short but I was able to deliver an internal talk about type programming, diving deeper into Typescript with complex examples.
+
+### Post Mattermost Layoff (2023)
+
+In February of 2023, Mattermost had his first layoff round, and I was affected. Yes, 2 layoffs in a span of 8 months, lucky me. This time, I didn't rushed the job hunting. I spent the first month on the recently launched course [Total Typescript by Matt Pocock](https://www.totaltypescript.com/). The course was the missing piece to understand better Typescript. [Matt used my code in Mattermost as an example of use case of String template](https://x.com/mattpocockuk/status/1623688104912515073).
+
+After finishing the course, I spent my time helping people in the `Total Typescript` Discord, I was promoted to `wizard`. In May of 2023 I started a new job as a founding engineer, which limited my involvement.
+
+In December, I decided to try [Advent of TS](https://www.adventofts.com), I completed days 2, 3, 4, 5, 12, 13, 16, 20 and 21. Those last 2 days were tough, after months without practise. The day 20 required to print transfrom a string to ASCII art, while [day 21 involved solving a 3x3 TicTacToe](https://tsplay.dev/wjK5MN).
+
+### Landbot (2025)
+
+In Feburary of 2025 I joined Landbot. Using new tricks I learned during 2024, I improved the developer experience, a few examples:
+
+- A better autocomplete for non-know ahead list of possible values `type Role = "admin" | "user" | (string & {})`;
+- Components props that are type correctly based on discriminant properties.
+
+Then in September I began freelancing, but my current gig they aren't using Typescript.
+
+## Conclusion
+
+That's an overview of my Typescript journey. In just 1 year, with the right context and resources I went for barely know Typescript to be comfortable to read and write complex types. My opinion of Typescript has changed for the better.
+
+Talking about `Total Typescript` course reminded me to check for new content and write my notes in Obsidian. I'm currently focused on practising Rust. [I'm migrating Vitest/Jest ESlint rules to Rust](https://github.com/oxc-project/oxc/pulls?q=is%3Apr+author%3AAfsoon+) and [even built from zero a branfuck interpreter cli](https://github.com/Afsoon/braincrub). Next I plan to prioritize [Practical Accesability by Sara Soueidan](https://practical-accessibility.today/).
