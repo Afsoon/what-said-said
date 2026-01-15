@@ -1,35 +1,35 @@
-import type { PageProps } from "@parcel/rsc";
-import { Nav } from "../components/Nav";
-import "../page.css";
-// import '../client';
+import { waitUntil } from 'cloudflare:workers'; // eslint-disable-line import/no-unresolved
+import { Link } from 'waku';
 
-export default function Index({ pages, currentPage }: PageProps) {
-	return (
-		<html lang="en">
-			<head>
-				<meta charSet="utf-8" />
-				<meta name="viewport" content="width=device-width, initial-scale=1" />
-				<title>What Said Said</title>
-			</head>
-			<body>
-				<header>
-					<h1>What Said Said</h1>
-				</header>
-				<h2>Blog Posts</h2>
-				<Nav
-					pages={pages
-						.filter((page) => page.url.startsWith("/blog"))
-						.slice(0, 5)}
-					currentPage={currentPage}
-				/>
-				<h2>TIL</h2>
-				<Nav
-					pages={pages
-						.filter((page) => page.url.startsWith("/til"))
-						.slice(0, 5)}
-					currentPage={currentPage}
-				/>
-			</body>
-		</html>
-	);
+export default async function HomePage() {
+
+  // Example: invoking waitUntil() on the Cloudflare executionCtx.
+  // https://hono.dev/docs/api/context#executionctx
+  waitUntil(
+    new Promise<void>((resolve) => {
+      setTimeout(() => {
+        console.log(
+          'Cloudflare waitUntil() promise resolved. The server response does not wait for this.',
+        );
+        resolve();
+      }, 1000);
+    }),
+  );
+
+  return (
+    <div>
+      <Link to="/blog" className="mt-4 inline-block underline">
+        Blog
+      </Link>
+    </div>
+  );
 }
+
+// Enable dynamic server rendering.
+// Static rendering is possible if you want to render at build time.
+// The Hono context will not be available.
+export const getConfig = async () => {
+  return {
+    render: 'static',
+  } as const;
+};

@@ -1,20 +1,17 @@
 {
-  "$schema": "./node_modules/wrangler/config-schema.json",
-  "name": "what-said-said",
-  "compatibility_date": "2025-03-21",
-  // Enable Node.js compatibility so that AsyncLocalStorage works.
-  "compatibility_flags": ["nodejs_compat"],
-  "main": "./worker/index.js",
-  // Parcel will do the bundling. We don't need wrangler's default bundling.
-  "no_bundle": true,
-  // Serve the dist dir as static assets.
-  // Ideally this would be dist/client only, but Cloudflare doesn't have
-  // an option to mount the assets at a sub-path.
-  // Instead, make sure you have .assetsignore file inside dist to ensure that
-  // the server code isn't publicly accessible.
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "waku-project",
+  "main": "./dist/server/serve-cloudflare.js",
+  // nodejs_als is required for Waku server-side request context
+  // It can be removed if only building static pages
+  "compatibility_flags": ["nodejs_als", "nodejs_compat"],
+  // https://developers.cloudflare.com/workers/platform/compatibility-dates
+  "compatibility_date": "2025-11-17",
   "assets": {
-    "directory": "./dist",
+    // https://developers.cloudflare.com/workers/static-assets/binding/
     "binding": "ASSETS",
+    "directory": "./dist/public",
+    "html_handling": "drop-trailing-slash",
   },
   "routes": [
     {
@@ -22,4 +19,14 @@
       "custom_domain": true,
     },
   ],
+  "vars": {
+    "MAX_ITEMS": 10,
+  },
+  "rules": [
+    {
+      "type": "ESModule",
+      "globs": ["**/*.js", "**/*.mjs"],
+    },
+  ],
+  "no_bundle": true,
 }
