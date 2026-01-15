@@ -3,7 +3,12 @@ import { compileMDX } from 'next-mdx-remote/rsc';
 import { getFileName } from '../lib/get-file-name';
 import { components } from './mdx';
 import { Meta } from './meta';
+import { remarkCodeHike, recmaCodeHike } from 'codehike/mdx';
 import { BlogFrontmatter } from '../types';
+
+const chConfig = {
+  components: { code: "Code" },
+};
 
 export async function PostPage({
   slug,
@@ -26,7 +31,13 @@ export async function PostPage({
   const mdx = await compileMDX({
     source,
     components,
-    options: { parseFrontmatter: true },
+    options: {
+      parseFrontmatter: true,
+      mdxOptions: {
+        remarkPlugins: [[remarkCodeHike, chConfig]],
+        recmaPlugins: [[recmaCodeHike, chConfig]],
+      }
+    },
   });
   const { content } = mdx;
   const frontmatter = mdx.frontmatter as BlogFrontmatter;

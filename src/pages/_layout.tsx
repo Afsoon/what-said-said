@@ -13,7 +13,7 @@ export default async function RootLayout({ children }: RootLayoutProps) {
 				<meta name="viewport" content="width=device-width, initial-scale=1" />
 				<title>What Said Said</title>
       </head>
-      <body>
+      <body className='bg-gray-400'>
         <ClientProviders>
           {children}
         </ClientProviders>

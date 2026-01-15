@@ -1,8 +1,18 @@
 import { Link } from 'waku';
-import { Code } from '../components/code';
+import { Code as MyCode } from '../components/code';
 import { getAnchor } from '../utils/get-anchor';
+import { RawCode } from 'codehike/code';
 
 export const components = {
+  Code: ({ codeblock }: { codeblock: RawCode }) => {
+    // We pass the codeblock to your existing Code component
+    // Note: In Code Hike 1.0, the content is in codeblock.value
+    return (
+      <MyCode
+        codeblock={codeblock}
+      />
+    );
+  },
   h2: ({ children, ...rest }: any) => {
     const id = getAnchor(children);
 

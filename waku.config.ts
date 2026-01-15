@@ -24,12 +24,5 @@ export default defineConfig({
         },
       }),
     ],
-    environments: {
-          rsc: {
-            resolve: {
-              external: ['shiki'],
-            },
-          },
-        },
   },
 });

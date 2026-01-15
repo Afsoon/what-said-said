@@ -1,14 +1,7 @@
-import { codeToHtml } from '../lib/shiki';
+import { Pre, RawCode, highlight } from "codehike/code"
 
-type CodeProps = {
-  code: string;
-};
-
-export const Code = async ({ code, ...rest }: CodeProps) => {
-  const html = await codeToHtml(code.trim(), {
-    lang: 'tsx',
-    theme: 'lucy',
-  });
-
-  return <div dangerouslySetInnerHTML={{ __html: html }} {...rest} />;
-};
+export async function Code({ codeblock }: { codeblock: RawCode }) {
+  console.log("codeblock", codeblock);
+  const highlighted = await highlight(codeblock, "github-dark")
+  return <Pre code={highlighted} />
+}
