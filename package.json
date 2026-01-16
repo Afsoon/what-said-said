@@ -1,7 +1,21 @@
 {
-  "name": "wa",
-  "version": "0.0.0",
+  "name": "what-said-said",
+  "version": "1.0.0",
   "private": true,
+  "description": "My blog to journal my learning",
+  "keywords": [
+    "blog"
+  ],
+  "homepage": "https://whatsaidsaid.com",
+  "bugs": {
+    "url": "https://github.com/Afsoon/what-said-said/issues"
+  },
+  "license": "Apache-2.0",
+  "author": "Said Atrahouch",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Afsoon/what-said-said.git"
+  },
   "type": "module",
   "scripts": {
     "cf-typegen": "wrangler types",
