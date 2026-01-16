@@ -1,25 +1,27 @@
-import nodeLoaderCloudflare from '@hiogawa/node-loader-cloudflare/vite';
-import tailwindcss from '@tailwindcss/vite';
-import react from '@vitejs/plugin-react';
-import { defineConfig } from 'waku/config';
+import nodeLoaderCloudflare from "@hiogawa/node-loader-cloudflare/vite";
+import tailwindcss from "@tailwindcss/vite";
+import react from "@vitejs/plugin-react";
+import tsconfigPaths from "vite-tsconfig-paths";
+import { defineConfig } from "waku/config";
 
 export default defineConfig({
   vite: {
     plugins: [
+      tsconfigPaths(),
       tailwindcss(),
       react({
         babel: {
-          plugins: ['babel-plugin-react-compiler'],
+          plugins: ["babel-plugin-react-compiler"],
         },
       }),
 
       nodeLoaderCloudflare({
-        environments: ['rsc'],
+        environments: ["rsc"],
         build: true,
         // https://developers.cloudflare.com/workers/wrangler/api/#getplatformproxy
         getPlatformProxyOptions: {
           persist: {
-            path: '.wrangler/state/v3',
+            path: ".wrangler/state/v3",
           },
         },
       }),

@@ -1,7 +1,7 @@
-import slugify from '@sindresorhus/slugify';
+import slugify from "@sindresorhus/slugify";
 
 export const getAnchor = (value: any) => {
-  const isString = typeof value === 'string';
+  const isString = typeof value === "string";
 
-  return isString ? slugify(value) : '';
+  return isString ? slugify(value) : "";
 };

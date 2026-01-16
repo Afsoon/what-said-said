@@ -3,5 +3,5 @@ export type BlogFrontmatter = {
   description: string;
   date: string;
   updated_at: string | null;
-  tag: string[]
+  tag: string[];
 };

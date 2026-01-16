@@ -1,5 +1,5 @@
-import { PostPage } from '../../components/post-page';
-import { getPostPaths } from '../../lib/get-file-name';
+import { PostPage } from "@/components/post-page";
+import { getPostPaths } from "@/lib/get-file-name";
 
 type BlogArticlePageProps = {
   slug: string;
@@ -10,10 +10,10 @@ export default async function BlogArticlePage({ slug }: BlogArticlePageProps) {
 }
 
 export const getConfig = async () => {
-  const blogPaths = await getPostPaths('./private/contents');
+  const blogPaths = await getPostPaths("./private/contents");
 
   return {
-    render: 'static',
+    render: "static",
     staticPaths: blogPaths,
   } as const;
 };

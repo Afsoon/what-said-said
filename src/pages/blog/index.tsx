@@ -1,8 +1,8 @@
-import { readFileSync, readdirSync } from 'node:fs';
-import { compileMDX } from 'next-mdx-remote/rsc';
-import { Meta } from '../../components/meta';
-import { PostList, PostListContainer } from '../../components/post-list';
-import type { BlogFrontmatter } from '../../types';
+import { readFileSync, readdirSync } from "node:fs";
+import { compileMDX } from "next-mdx-remote/rsc";
+import { Meta } from "@/components/meta";
+import { PostList, PostListContainer } from "@/components/post-list";
+import type { BlogFrontmatter } from "@/types";
 
 export default async function BlogIndexPage() {
   const articles = await getArticles();
@@ -27,25 +27,25 @@ const getArticles = async () => {
     rawDate: string;
   }> = [];
 
-  readdirSync('./private/contents').forEach((fileName) => {
-    if (fileName.endsWith('.mdx')) {
+  readdirSync("./private/contents").forEach((fileName) => {
+    if (fileName.endsWith(".mdx")) {
       blogFileNames.push(fileName);
     }
   });
 
   for await (const fileName of blogFileNames) {
     const path = `./private/contents/${fileName}`;
-    const source = readFileSync(path, 'utf8');
+    const source = readFileSync(path, "utf8");
     const mdx = await compileMDX({
       source,
       options: { parseFrontmatter: true },
     });
     const frontmatter = mdx.frontmatter as BlogFrontmatter;
 
-    const date = new Date(frontmatter.date).toLocaleDateString('en-US', {
-      month: 'long',
-      day: 'numeric',
-      year: 'numeric',
+    const date = new Date(frontmatter.date).toLocaleDateString("en-US", {
+      month: "long",
+      day: "numeric",
+      year: "numeric",
     });
 
     const article = {
@@ -64,6 +64,6 @@ const getArticles = async () => {
 
 export const getConfig = async () => {
   return {
-    render: 'static',
+    render: "static",
   } as const;
 };
