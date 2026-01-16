@@ -30,7 +30,7 @@ export function Tag({ children, className, ...props }: TagProps) {
 
   return (
     <PrimitiveTag
-      textValue={textValue}
+      textValue={textValue as string}
       className={cx(
         "inset-ring inset-ring-input outline-hidden dark:bg-input/30",
         "inline-flex items-center gap-x-1.5 py-0.5 font-medium text-xs/5 forced-colors:outline",

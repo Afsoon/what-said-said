@@ -2,6 +2,8 @@ import { Link } from "waku";
 import { Code as MyCode } from "@/components/code";
 import { getAnchor } from "@/utils/get-anchor";
 import { RawCode } from "codehike/code";
+import { Heading } from "./ui/heading";
+import { Text } from "./ui/text";
 
 export const components = {
   Code: ({ codeblock }: { codeblock: RawCode }) => {
@@ -13,68 +15,71 @@ export const components = {
     const id = getAnchor(children);
 
     return (
-      <h2
+      <Heading
         id={id}
-        className="mt-16 mb-2 scroll-mt-16 text-3xl leading-none font-bold text-balance text-white first:mt-0 sm:text-[2.75rem] xl:mt-20 xl:scroll-mt-20"
+        level={2}
+        className="mt-16 mb-2 scroll-mt-16 text-3xl leading-none font-bold text-balance first:mt-0 sm:text-[2.75rem] xl:mt-20 xl:scroll-mt-20"
         {...rest}
       >
         <a href={`#${id}`}>{children}</a>
-      </h2>
+      </Heading>
     );
   },
   h3: ({ children, ...rest }: any) => {
     const id = getAnchor(children);
 
     return (
-      <h3
+      <Heading
+        level={3}
         id={id}
-        className="mt-8 mb-2 scroll-mt-8 text-xl leading-none font-bold text-balance text-white sm:text-3xl"
+        className="mt-8 mb-2 scroll-mt-8 text-xl leading-none font-bold text-balance sm:text-3xl"
         {...rest}
       >
         <a href={`#${id}`}>{children}</a>
-      </h3>
+      </Heading>
     );
   },
   h4: ({ children, ...rest }: any) => {
     const id = getAnchor(children);
 
     return (
-      <h4
+      <Heading
+        level={4}
         id={id}
-        className="mt-8 mb-2 scroll-mt-8 text-lg leading-none font-bold tracking-wide text-balance text-white uppercase sm:text-xl"
+        className="mt-8 mb-2 scroll-mt-8 text-lg leading-none font-bold tracking-wide text-balance uppercase sm:text-xl"
         {...rest}
       >
         <a href={`#${id}`}>{children}</a>
-      </h4>
+      </Heading>
     );
   },
   p: ({ children, ...rest }: any) => {
     return (
-      <p
-        className="mb-4 text-sm leading-normal font-normal text-pretty text-white/60 sm:text-lg lg:text-xl"
+      <Text
+        className="mb-4 text-sm leading-normal font-normal text-pretty sm:text-lg lg:text-xl"
         {...rest}
       >
         {children}
-      </p>
+      </Text>
     );
   },
   strong: ({ children, ...rest }: any) => {
     return (
-      <b className="font-bold text-white" {...rest}>
+      <b className="font-bold" {...rest}>
         {children}
       </b>
     );
   },
   em: ({ children, ...rest }: any) => {
     return (
-      <i className="text-white/70 italic" {...rest}>
+      <i className="italic" {...rest}>
         {children}
       </i>
     );
   },
   a: ({ href, children, ...rest }: any) => {
     const classNames =
-      "text-white/80 underline decoration-white/60 decoration-1 transition-colors duration-300 ease-in-out hover:text-white";
+      "text-info-subtle-fg underline decoration-info-subtle-fg decoration-1 transition-colors duration-300 ease-in-out hover:text-primary hover:decoration-primary";
 
     if (href.startsWith("/")) {
       <Link to={href} className={classNames} {...rest}>
@@ -91,7 +96,7 @@ export const components = {
   ul: ({ children, ...rest }: any) => {
     return (
       <ul
-        className="mb-4 ml-4 list-disc text-base leading-normal font-normal text-white/60 sm:text-lg lg:text-xl"
+        className="text-muted-fg mb-4 ml-4 list-disc text-base/6 leading-normal font-normal sm:text-sm/6 lg:text-xl"
         {...rest}
       >
         {children}
@@ -101,7 +106,7 @@ export const components = {
   ol: ({ children, ...rest }: any) => {
     return (
       <ol
-        className="mb-4 ml-4 list-decimal text-base leading-normal font-normal text-white/60 sm:text-lg lg:text-xl"
+        className="text-muted-fg mb-4 ml-4 list-decimal text-base/6 leading-normal font-normal sm:text-sm/6 lg:text-xl"
         {...rest}
       >
         {children}

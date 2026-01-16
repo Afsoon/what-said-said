@@ -15,10 +15,10 @@ export default async function RootLayout({ children }: RootLayoutProps) {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <title>What Said Said</title>
       </head>
-      <body className="bg-gray-400">
+      <body className="bg-bg h-dvw">
         <ClientProviders>
-          <AppNavbar />
-          <Container constrained className="bg-white">
+          <Container constrained className="">
+            <AppNavbar />
             {children}
           </Container>
         </ClientProviders>

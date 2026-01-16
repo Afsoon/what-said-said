@@ -1,24 +1,28 @@
 import type { ReactNode } from "react";
 import { ClientLink } from "./link";
+import { Text } from "./ui/text";
+import { Heading } from "./ui/heading";
 
 type PostListItemProps = {
-  slug: string;
+  url: string;
   title: string;
   description: string;
   date: string;
 };
 
 const PostListItem = ({ postItem }: { postItem: PostListItemProps }) => (
-  <li key={postItem.slug} className="-mx-px first:-mt-4 sm:first:-mt-6 lg:first:-mt-12">
+  <li key={postItem.url} className="-mx-px first:-mt-4 sm:first:-mt-6 lg:first:-mt-12">
     <ClientLink
-      href={`/blog/${postItem.slug}`}
-      className="group hover:border-secondary block w-full rounded-xl border border-gray-800 bg-gray-950/90 p-2 transition-colors duration-300 ease-in-out sm:p-4 lg:p-6"
+      href={postItem.url}
+      className="hover:ring-primary text-fg block w-full rounded-xl border px-4 py-2 duration-300 ease-in-out hover:-translate-y-2 hover:rounded-lg hover:shadow-xl hover:ring-2 hover:ring-offset-2 motion-safe:transition-all"
     >
-      <span>{postItem.date}</span>
-      <h3 className="font-headline text-2xl leading-none sm:text-3xl">{postItem.title}</h3>
-      <div className="mt-2 text-sm leading-snug font-normal text-white/60 sm:mt-1 sm:text-base">
+      <Text>{postItem.date}</Text>
+      <Heading level={3} className="font-headline text-2xl leading-none sm:text-3xl">
+        {postItem.title}
+      </Heading>
+      <Text className="mt-2 line-clamp-2 h-full max-h-15 text-sm leading-snug font-normal">
         {postItem.description}
-      </div>
+      </Text>
     </ClientLink>
   </li>
 );
@@ -26,7 +30,7 @@ const PostListItem = ({ postItem }: { postItem: PostListItemProps }) => (
 export const PostList = ({ posts }: { posts: PostListItemProps[] }) => (
   <ul className="-mx-4 -mt-px flex flex-col gap-6 sm:-mx-6 lg:-mx-12 lg:gap-12">
     {posts.map((post) => (
-      <PostListItem key={post.slug} postItem={post} />
+      <PostListItem key={post.url} postItem={post} />
     ))}
   </ul>
 );

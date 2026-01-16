@@ -9,7 +9,7 @@ export default async function BlogIndexPage() {
 
   return (
     <main className="relative px-8 pb-24 lg:pb-32">
-      <Meta title="What Said Said blog" description="List of available blog posts" />
+      <Meta title="What Said Said blog" description="List of available TIL" />
       <PostListContainer>
         <PostList posts={articles} />
       </PostListContainer>
@@ -27,14 +27,14 @@ const getArticles = async () => {
     rawDate: string;
   }> = [];
 
-  readdirSync("./private/contents").forEach((fileName) => {
+  readdirSync("./private/til").forEach((fileName) => {
     if (fileName.endsWith(".mdx")) {
       blogFileNames.push(fileName);
     }
   });
 
   for await (const fileName of blogFileNames) {
-    const path = `./private/contents/${fileName}`;
+    const path = `./private/til/${fileName}`;
     const source = readFileSync(path, "utf8");
     const mdx = await compileMDX({
       source,
@@ -49,7 +49,7 @@ const getArticles = async () => {
     });
 
     const article = {
-      url: `/blog/${fileName.substring(0, fileName.length - 4)}`,
+      url: `/til/${fileName.substring(0, fileName.length - 4)}`,
       title: frontmatter.title,
       description: frontmatter.description,
       date,
