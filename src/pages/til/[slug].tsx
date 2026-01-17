@@ -6,7 +6,7 @@ type BlogArticlePageProps = {
 };
 
 export default async function BlogArticlePage({ slug }: BlogArticlePageProps) {
-  return <PostPage slug={slug} folder="./private/til" />;
+  return <PostPage slug={slug} folder="./private/til" basePath="til" />;
 }
 
 export const getConfig = async () => {

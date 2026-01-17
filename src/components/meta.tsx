@@ -1,10 +1,10 @@
 type MetaProps = {
   title: string;
   description: string;
-  slug?: string;
+  path?: string;
 };
 
-export const Meta = ({ title, description, slug }: MetaProps) => {
+export const Meta = ({ title, description, path }: MetaProps) => {
   return (
     <>
       <title>{title}</title>
@@ -13,8 +13,8 @@ export const Meta = ({ title, description, slug }: MetaProps) => {
       <meta property="og:title" content={title} />
       <meta property="og:description" content={description} />
 
-      {slug != null ? (
-        <meta property="og:url" content={`https://whatsaidsaid.com/blog/${slug}`} />
+      {path != null ? (
+        <meta property="og:url" content={`https://whatsaidsaid.com/${path}`} />
       ) : null}
 
       <link rel="alternate" type="application/rss+xml" title="rss" href="https://waku.gg/rss.xml" />

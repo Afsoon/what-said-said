@@ -36,7 +36,7 @@ const GridContainer = ({ children }: { children: React.ReactNode }) => {
 
 export const HomeHero = ({ allArticles, blogArticles, tilArticles }: HomeHeroProps) => {
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-2 px-8">
       <Header title="Blog" description="Recent post and TIL" />
       <Tabs aria-label="Categories to filter blog content">
         <TabList>
