@@ -1,51 +1,63 @@
 {
   "name": "what-said-said",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Afsoon/what-said-said.git"
-  },
-  "license": "Apache-2.0",
-  "author": "Said Atrahouch",
+  "version": "1.0.0",
   "private": true,
-  "version": "0.0.0",
   "description": "My blog to journal my learning",
   "keywords": [
     "blog"
   ],
-  "homepage": "https://github.com/Afsoon/what-said-said#readme",
+  "homepage": "https://whatsaidsaid.com",
   "bugs": {
     "url": "https://github.com/Afsoon/what-said-said/issues"
   },
-  "targets": {
-    "react-static": {
-      "source": [
-        "src/pages/*",
-        "src/pages/**/*"
-      ],
-      "context": "react-server",
-      "includeNodeModules": {
-        "tree-sitter-highlight": false
-      }
-    }
+  "license": "Apache-2.0",
+  "author": "Said Atrahouch",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Afsoon/what-said-said.git"
   },
+  "type": "module",
   "scripts": {
-    "start": "parcel",
-    "build": "parcel build"
+    "cf-typegen": "wrangler types",
+    "dev": "waku dev",
+    "build": "waku build",
+    "start": "wrangler dev",
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix",
+    "fmt": "oxfmt",
+    "fmt:check": "oxfmt --check"
   },
   "dependencies": {
-    "@hpcc-js/wasm-graphviz": "^1.11.0",
-    "@parcel/rsc": "^2.15.4",
-    "react": "^19.1.1",
-    "react-dom": "^19.1.1",
-    "tree-sitter-highlight": "^1.0.1",
-    "wrangler": "^4.31.0"
+    "@heroicons/react": "^2.2.0",
+    "@sindresorhus/slugify": "^3.0.0",
+    "codehike": "^1.0.7",
+    "hono": "^4.10.0",
+    "motion": "^12.26.2",
+    "next-mdx-remote": "^5.0.0",
+    "react": "~19.2.3",
+    "react-aria-components": "^1.14.0",
+    "react-dom": "~19.2.3",
+    "react-server-dom-webpack": "~19.2.3",
+    "tailwind-merge": "^3.4.0",
+    "tailwind-variants": "^3.2.2",
+    "tailwindcss-react-aria-components": "^2.0.1",
+    "tw-animate-css": "^1.4.0",
+    "waku": "1.0.0-alpha.2",
+    "wrangler": "^4.58.0"
   },
   "devDependencies": {
-    "@parcel/packager-react-static": "^2.15.4",
-    "@parcel/transformer-react-static": "^2.15.4",
-    "@types/react": "^19.1.10",
-    "@types/react-dom": "^19.1.7",
-    "parcel": "^2.15.4",
-    "typescript": "^5.9.2"
+    "@hiogawa/node-loader-cloudflare": "^0.0.2",
+    "@tailwindcss/vite": "^4.1.18",
+    "@types/node": "^25.0.6",
+    "@types/react": "^19.2.8",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.1.0",
+    "babel-plugin-react-compiler": "^1.0.0",
+    "miniflare": "^4.20260107.0",
+    "oxfmt": "^0.24.0",
+    "oxlint": "^1.39.0",
+    "tailwindcss": "^4.1.18",
+    "typescript": "^5.9.3",
+    "vite-tsconfig-paths": "^6.0.4"
   }
 }

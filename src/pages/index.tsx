@@ -1,35 +1,115 @@
-import type { PageProps } from "@parcel/rsc";
-import { Nav } from "../components/Nav";
-import "../page.css";
-// import '../client';
+import { ArticleItem, HomeHero } from "@/components/home_hero";
+import { readFileSync, readdirSync } from "node:fs";
+import { compileMDX } from "next-mdx-remote/rsc";
+import type { BlogFrontmatter } from "@/types";
 
-export default function Index({ pages, currentPage }: PageProps) {
-	return (
-		<html lang="en">
-			<head>
-				<meta charSet="utf-8" />
-				<meta name="viewport" content="width=device-width, initial-scale=1" />
-				<title>What Said Said</title>
-			</head>
-			<body>
-				<header>
-					<h1>What Said Said</h1>
-				</header>
-				<h2>Blog Posts</h2>
-				<Nav
-					pages={pages
-						.filter((page) => page.url.startsWith("/blog"))
-						.slice(0, 5)}
-					currentPage={currentPage}
-				/>
-				<h2>TIL</h2>
-				<Nav
-					pages={pages
-						.filter((page) => page.url.startsWith("/til"))
-						.slice(0, 5)}
-					currentPage={currentPage}
-				/>
-			</body>
-		</html>
-	);
+type ArticleItemRaw = ArticleItem & { rawDate: string };
+
+export default async function HomePage() {
+  const articles = await getArticles();
+  const tils = await getTILs();
+
+  const all = [...articles, ...tils].sort((a, b) => (a.rawDate > b.rawDate ? -1 : 1));
+
+  return (
+    <HomeHero
+      allArticles={all.slice(0, 9)}
+      blogArticles={articles.slice(0, 9)}
+      tilArticles={tils.slice(0, 9)}
+    />
+  );
 }
+
+const getArticles = async () => {
+  const blogFileNames: Array<string> = [];
+  const blogArticles: Array<ArticleItemRaw> = [];
+
+  readdirSync("./private/contents").forEach((fileName) => {
+    if (fileName.endsWith(".mdx")) {
+      blogFileNames.push(fileName);
+    }
+  });
+
+  for await (const fileName of blogFileNames) {
+    const path = `./private/contents/${fileName}`;
+    const source = readFileSync(path, "utf8");
+    const mdx = await compileMDX({
+      source,
+      options: { parseFrontmatter: true },
+    });
+    const frontmatter = mdx.frontmatter as BlogFrontmatter;
+
+    const date = new Date(frontmatter.date).toLocaleDateString("en-US", {
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+    });
+
+    const slug = fileName.substring(0, fileName.length - 4);
+
+    const article = {
+      type: "blog",
+      slug,
+      url: `/blog/${slug}`,
+      title: frontmatter.title,
+      description: frontmatter.description,
+      date,
+      tags: frontmatter.tag.map((tag) => ({ id: `${slug}-${tag}`, name: tag })),
+      rawDate: frontmatter.date,
+    } as ArticleItemRaw;
+
+    blogArticles.push(article);
+  }
+
+  return blogArticles.sort((a, b) => (a.rawDate > b.rawDate ? -1 : 1));
+};
+
+const getTILs = async () => {
+  const tilFileNames: Array<string> = [];
+  const tilArticles: Array<ArticleItemRaw> = [];
+
+  readdirSync("./private/til").forEach((fileName) => {
+    if (fileName.endsWith(".mdx")) {
+      tilFileNames.push(fileName);
+    }
+  });
+
+  for await (const fileName of tilFileNames) {
+    const path = `./private/til/${fileName}`;
+    const source = readFileSync(path, "utf8");
+    const mdx = await compileMDX({
+      source,
+      options: { parseFrontmatter: true },
+    });
+    const frontmatter = mdx.frontmatter as BlogFrontmatter;
+
+    const date = new Date(frontmatter.date).toLocaleDateString("en-US", {
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+    });
+
+    const slug = fileName.substring(0, fileName.length - 4);
+
+    const til = {
+      type: "til",
+      slug,
+      url: `/til/${slug}`,
+      title: frontmatter.title,
+      description: frontmatter.description,
+      date,
+      tags: frontmatter.tag.map((tag) => ({ id: `${slug}-${tag}`, name: tag })),
+      rawDate: frontmatter.date,
+    } as ArticleItemRaw;
+
+    tilArticles.push(til);
+  }
+
+  return tilArticles.sort((a, b) => (a.rawDate > b.rawDate ? -1 : 1));
+};
+
+export const getConfig = async () => {
+  return {
+    render: "static",
+  } as const;
+};
