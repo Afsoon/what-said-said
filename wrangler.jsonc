@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "waku-project",
+  "name": "what-said-said",
   "main": "./dist/server/serve-cloudflare.js",
   // nodejs_als is required for Waku server-side request context
   // It can be removed if only building static pages
