@@ -1,0 +1,29 @@
+---
+title: "PNPM in Cloudflare workers"
+description: "Cloudflare couldn't install dependencies without a package.yaml"
+date: "2026-01-16"
+updated_at: null
+tag: ["Cloudflare", "pnpm"]
+---
+
+Migrating the blog from Parcel to Waka (Vite & RSC), Cloudflare was failing to install the dependencies. The surprise came because `pnpm` was able to install it locally, but Cloudflare isn't. At the moment of writing this isn't a monorepo project, and based on [this Github Issue of pnpm, the package is optional](https://github.com/pnpm/pnpm/issues/8968). If you are migrating to `pnpm`, running the project in Cloudflare workers and see the following log error
+
+```
+18:40:28.682	Initializing build environment...
+18:40:29.955	Success: Finished initializing build environment
+18:40:30.215	Cloning repository...
+18:40:32.190	Restoring from dependencies cache
+18:40:32.192	Restoring from build output cache
+18:40:32.196	Detected the following tools from environment: pnpm@10.11.1, nodejs@22.16.0
+18:40:32.339	Installing project dependencies: pnpm install --frozen-lockfile
+18:40:33.424	 ERROR  packages field missing or empty
+18:40:33.424	For help, run: pnpm help install
+18:40:33.441	Failed: error occurred while installing tools or dependencies
+```
+
+Add the `package.yaml` at root level, and update the `pnpm-workspace.yaml` with the following section:
+
+```yaml
+packages:
+  - .
+```

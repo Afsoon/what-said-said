@@ -29,9 +29,11 @@ export const ContentCard = ({ type, href, title, date, description, tags }: Cont
     >
       <Card className="relative h-full px-0.5">
         <CardHeader>
-          <CardTitle className="flex content-center items-end gap-1.5 space-y-1">
+          <CardTitle className="flex content-center items-center gap-1.5 space-y-1">
             <Badge intent={type}>{type.toUpperCase()}</Badge>
-            <Heading level={2}>{title}</Heading>
+            <Heading level={2} className="align-top">
+              {title}
+            </Heading>
           </CardTitle>
           <CardDescription>Published at {date}</CardDescription>
         </CardHeader>
@@ -43,7 +45,9 @@ export const ContentCard = ({ type, href, title, date, description, tags }: Cont
             selectionMode="none"
             aria-label={`${title} is categorized as ${tags.join(", ")}`}
           >
-            <TagList items={tags}>{(item) => <Tag>{item.name}</Tag>}</TagList>
+            <TagList className="flex gap-1" items={tags}>
+              {(item) => <Tag>{item.name}</Tag>}
+            </TagList>
           </TagGroup>
         </CardFooter>
       </Card>
