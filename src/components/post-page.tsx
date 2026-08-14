@@ -1,16 +1,10 @@
 import { readFileSync } from "node:fs";
-import { compileMDX } from "next-mdx-remote/rsc";
 import { getFileName } from "@/lib/get-file-name";
+import { compilePost } from "@/lib/mdx";
 import { components } from "./mdx";
 import { Meta } from "./meta";
-import { remarkCodeHike, recmaCodeHike } from "codehike/mdx";
-import { BlogFrontmatter } from "@/types";
 import { Heading } from "./ui/heading";
 import { Text } from "./ui/text";
-
-const chConfig = {
-  components: { code: "Code" },
-};
 
 export async function PostPage({
   slug,
@@ -29,19 +23,7 @@ export async function PostPage({
 
   const path = `${folder}/${fileName}`;
   const source = readFileSync(path, "utf8");
-  const mdx = await compileMDX({
-    source,
-    components,
-    options: {
-      parseFrontmatter: true,
-      mdxOptions: {
-        remarkPlugins: [[remarkCodeHike, chConfig]],
-        recmaPlugins: [[recmaCodeHike, chConfig]],
-      },
-    },
-  });
-  const { content } = mdx;
-  const frontmatter = mdx.frontmatter as BlogFrontmatter;
+  const { Content, frontmatter } = await compilePost(source);
 
   const date = frontmatter.date
     ? new Date(frontmatter.date).toLocaleDateString("en-US", {
@@ -74,7 +56,7 @@ export async function PostPage({
         <hr className="mt-2 h-px border-none bg-gray-800" />
       </div>
       <div className="relative z-10 mx-auto w-full max-w-[80ch] pt-8 lg:pt-16 xl:-right-[calc(296px/2)] 2xl:right-auto">
-        {content}
+        <Content components={components} />
       </div>
     </main>
   );

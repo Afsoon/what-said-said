@@ -1,13 +1,13 @@
-"use client"
+"use client";
 
-import { createContext, use } from "react"
+import { createContext, use } from "react";
 import type {
   TabListProps as TabListPrimitiveProps,
   TabPanelProps as TabPanelPrimitiveProps,
   TabPanelsProps,
   TabProps as TabPrimitiveProps,
   TabsProps as TabsPrimitiveProps,
-} from "react-aria-components"
+} from "react-aria-components";
 import {
   composeRenderProps,
   TabPanels as PrimitiveTabPanels,
@@ -18,12 +18,12 @@ import {
   TabsContext,
   Tabs as TabsPrimitive,
   useSlottedContext,
-} from "react-aria-components"
-import { twMerge } from "tailwind-merge"
-import { cx } from "@/lib/primitive"
+} from "react-aria-components";
+import { twMerge } from "tailwind-merge";
+import { cx } from "@/lib/primitive";
 
 interface TabsProps extends TabsPrimitiveProps {
-  ref?: React.RefObject<HTMLDivElement>
+  ref?: React.RefObject<HTMLDivElement>;
 }
 const Tabs = ({ className, ref, orientation = "horizontal", ...props }: TabsProps) => {
   return (
@@ -39,23 +39,23 @@ const Tabs = ({ className, ref, orientation = "horizontal", ...props }: TabsProp
         {...props}
       />
     </TabsContext>
-  )
-}
+  );
+};
 interface TabListContextValue {
-  selectionIndicator?: boolean
+  selectionIndicator?: boolean;
 }
-const TabListContext = createContext<TabListContextValue | undefined>(undefined)
+const TabListContext = createContext<TabListContextValue | undefined>(undefined);
 
 export function useTabListContext() {
-  const context = use(TabListContext)
+  const context = use(TabListContext);
   if (!context) {
-    throw new Error("useTabsContext must be used within TabsContext.Provider")
+    throw new Error("useTabsContext must be used within TabsContext.Provider");
   }
-  return context
+  return context;
 }
 
 interface TabListProps<T extends object> extends TabListPrimitiveProps<T>, TabListContextValue {
-  ref?: React.RefObject<HTMLDivElement>
+  ref?: React.RefObject<HTMLDivElement>;
 }
 const TabList = <T extends object>({
   className,
@@ -82,29 +82,29 @@ const TabList = <T extends object>({
         )}
       />
     </TabListContext>
-  )
-}
+  );
+};
 
 export function TabScrollArea({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div className="relative">
       <div className={twMerge("scrollbar-hidden overflow-x-auto sm:overflow-x-visible", className)}>
         <div
-          className="pointer-events-none absolute inset-x-0 bottom-0 h-px w-full bg-border"
+          className="bg-border pointer-events-none absolute inset-x-0 bottom-0 h-px w-full"
           aria-hidden
         />
         {props.children}
       </div>
     </div>
-  )
+  );
 }
 
 interface TabProps extends TabPrimitiveProps {
-  ref?: React.RefObject<HTMLDivElement>
+  ref?: React.RefObject<HTMLDivElement>;
 }
 const Tab = ({ className, ref, ...props }: TabProps) => {
-  const { orientation } = useSlottedContext(TabsContext)!
-  const { selectionIndicator } = useTabListContext()
+  const { orientation } = useSlottedContext(TabsContext)!;
+  const { selectionIndicator } = useTabListContext();
   return (
     <TabPrimitive
       {...props}
@@ -141,16 +141,16 @@ const Tab = ({ className, ref, ...props }: TabProps) => {
         </>
       ))}
     </TabPrimitive>
-  )
-}
+  );
+};
 
 interface TabPanelProps extends TabPanelPrimitiveProps {
-  ref?: React.RefObject<HTMLDivElement>
+  ref?: React.RefObject<HTMLDivElement>;
 }
 
 const TabPanels = <T extends object>(props: TabPanelsProps<T>) => {
-  return <PrimitiveTabPanels {...props} />
-}
+  return <PrimitiveTabPanels {...props} />;
+};
 
 const TabPanel = ({ className, ref, ...props }: TabPanelProps) => {
   return (
@@ -160,8 +160,8 @@ const TabPanel = ({ className, ref, ...props }: TabPanelProps) => {
       data-slot="tab-panel"
       className={cx("flex-1 text-fg text-sm/6 focus-visible:outline-hidden", className)}
     />
-  )
-}
+  );
+};
 
-export type { TabsProps, TabListProps, TabProps, TabPanelProps }
-export { Tabs, TabList, Tab, TabPanels, TabPanel }
+export type { TabsProps, TabListProps, TabProps, TabPanelProps };
+export { Tabs, TabList, Tab, TabPanels, TabPanel };

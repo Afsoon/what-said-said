@@ -1,8 +1,7 @@
 import { readFileSync, readdirSync } from "node:fs";
-import { compileMDX } from "next-mdx-remote/rsc";
 import { Meta } from "@/components/meta";
 import { PostList, PostListContainer } from "@/components/post-list";
-import type { BlogFrontmatter } from "@/types";
+import { readFrontmatter } from "@/lib/mdx";
 
 export default async function BlogIndexPage() {
   const articles = await getArticles();
@@ -36,11 +35,7 @@ const getArticles = async () => {
   for await (const fileName of blogFileNames) {
     const path = `./private/til/${fileName}`;
     const source = readFileSync(path, "utf8");
-    const mdx = await compileMDX({
-      source,
-      options: { parseFrontmatter: true },
-    });
-    const frontmatter = mdx.frontmatter as BlogFrontmatter;
+    const frontmatter = readFrontmatter(source);
 
     const date = new Date(frontmatter.date).toLocaleDateString("en-US", {
       month: "long",

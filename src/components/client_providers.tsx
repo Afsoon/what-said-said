@@ -1,7 +1,8 @@
 "use client";
 import { RouterProvider, I18nProvider } from "react-aria-components";
 import { useRouter } from "waku";
-import { Unstable_InferredPaths } from "waku/router/client";
+
+type RouterPushHref = Parameters<ReturnType<typeof useRouter>["push"]>[0];
 
 declare module "react-aria-components" {
   interface RouterConfig {
@@ -14,9 +15,7 @@ export function ClientProviders({ children }: { children: React.ReactNode }) {
 
   return (
     <RouterProvider
-      navigate={(path: Unstable_InferredPaths | (string & {})) =>
-        router.push(path as Unstable_InferredPaths)
-      }
+      navigate={(path: RouterPushHref | (string & {})) => router.push(path as RouterPushHref)}
     >
       <I18nProvider locale="en-US">{children}</I18nProvider>
     </RouterProvider>

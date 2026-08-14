@@ -1,7 +1,7 @@
 import { fsRouter } from "waku";
 import adapter from "waku/adapters/cloudflare";
 
-export default adapter(fsRouter(import.meta.glob("./**/*.{tsx,ts}", { base: "./pages" })), {
+export default adapter(fsRouter(import.meta.glob("./pages/**/*.{tsx,ts}")), {
   handlers: {
     // Define additional Cloudflare Workers handlers here
     // https://developers.cloudflare.com/workers/runtime-apis/handlers/

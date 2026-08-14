@@ -1,7 +1,6 @@
 import { ArticleItem, HomeHero } from "@/components/home_hero";
 import { readFileSync, readdirSync } from "node:fs";
-import { compileMDX } from "next-mdx-remote/rsc";
-import type { BlogFrontmatter } from "@/types";
+import { readFrontmatter } from "@/lib/mdx";
 
 type ArticleItemRaw = ArticleItem & { rawDate: string };
 
@@ -33,11 +32,7 @@ const getArticles = async () => {
   for await (const fileName of blogFileNames) {
     const path = `./private/contents/${fileName}`;
     const source = readFileSync(path, "utf8");
-    const mdx = await compileMDX({
-      source,
-      options: { parseFrontmatter: true },
-    });
-    const frontmatter = mdx.frontmatter as BlogFrontmatter;
+    const frontmatter = readFrontmatter(source);
 
     const date = new Date(frontmatter.date).toLocaleDateString("en-US", {
       month: "long",
@@ -77,11 +72,7 @@ const getTILs = async () => {
   for await (const fileName of tilFileNames) {
     const path = `./private/til/${fileName}`;
     const source = readFileSync(path, "utf8");
-    const mdx = await compileMDX({
-      source,
-      options: { parseFrontmatter: true },
-    });
-    const frontmatter = mdx.frontmatter as BlogFrontmatter;
+    const frontmatter = readFrontmatter(source);
 
     const date = new Date(frontmatter.date).toLocaleDateString("en-US", {
       month: "long",
