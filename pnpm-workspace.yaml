@@ -1,10 +1,7 @@
-packages:
-  - .
 allowBuilds:
+  '@google/genai': set this to true or false
   esbuild: true
+  lightningcss: true
+  protobufjs: set this to true or false
   sharp: true
   workerd: true
-minimumReleaseAgeExclude:
-  - hono@4.13.2
-  - miniflare@5.20260811.1-alpha
-  - wrangler@4.123.0
