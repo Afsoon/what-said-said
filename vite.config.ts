@@ -1,23 +1,52 @@
-import { defineConfig } from 'vite'
-import { devtools } from '@tanstack/devtools-vite'
+import { fileURLToPath } from "node:url";
+import { defineConfig } from "vite";
+import { devtools } from "@tanstack/devtools-vite";
 
-import { tanstackStart } from '@tanstack/react-start/plugin/vite'
+import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 
-import viteReact from '@vitejs/plugin-react'
-import tailwindcss from '@tailwindcss/vite'
-import { cloudflare } from '@cloudflare/vite-plugin'
-import contentCollections from '@content-collections/vite'
+import viteReact from "@vitejs/plugin-react";
+import tailwindcss from "@tailwindcss/vite";
+import { cloudflare } from "@cloudflare/vite-plugin";
+import contentCollections from "@content-collections/vite";
+import rsc from "@vitejs/plugin-rsc";
+import mdx from "@mdx-js/rollup";
+import remarkFrontmatter from "remark-frontmatter";
+import remarkMdxFrontmatter from "remark-mdx-frontmatter";
+import { recmaCodeHike, remarkCodeHike, type CodeHikeConfig } from "codehike/mdx";
+
+const chConfig: CodeHikeConfig = {
+	components: { code: "Code" },
+};
 
 const config = defineConfig({
-  resolve: { tsconfigPaths: true },
-  plugins: [
-    devtools(),
-    cloudflare({ viteEnvironment: { name: 'ssr' } }),
-    contentCollections(),
-    tailwindcss(),
-    tanstackStart(),
-    viteReact(),
-  ],
-})
+	resolve: {
+		tsconfigPaths: true,
+		alias: {
+			"~content": fileURLToPath(new URL("./content", import.meta.url)),
+		},
+	},
+	plugins: [
+		devtools(),
+		{
+			enforce: "pre",
+			...mdx({
+				remarkPlugins: [remarkFrontmatter, remarkMdxFrontmatter, [remarkCodeHike, chConfig]],
+				recmaPlugins: [[recmaCodeHike, chConfig]],
+			}),
+		},
+		cloudflare({ viteEnvironment: { name: "ssr", childEnvironments: ["rsc"] } }),
+		contentCollections({
+			environment: "ssr",
+		}),
+		tailwindcss(),
+		tanstackStart({
+			rsc: {
+				enabled: true,
+			},
+		}),
+		rsc(),
+		viteReact({ include: /\.(jsx|js|mdx|md|tsx|ts)$/ }),
+	],
+});
 
-export default config
+export default config;
