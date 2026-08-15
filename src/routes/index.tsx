@@ -26,7 +26,13 @@ const Simple01Horizontal = ({ article }: { article: Article }) => (
 				</div>
 			</div>
 
-			<p className="text-sm text-tertiary">{article.date}</p>
+			<p className="text-sm text-tertiary">
+				{new Date(article.date).toLocaleDateString("en-US", {
+					month: "long",
+					day: "numeric",
+					year: "numeric",
+				})}
+			</p>
 		</div>
 	</div>
 );
