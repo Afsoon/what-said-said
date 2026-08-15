@@ -1,8 +1,37 @@
-import { Link, createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import { allPosts } from "content-collections";
+import { useBreakpoint } from "@/hooks/use-breakpoint";
+import { cx } from "@/utils/cx";
+import { Link } from "#/components/base/link/link.tsx";
 
-const getPosts = createServerFn({ method: "GET" }).handler(async () =>
+type Article = Omit<(typeof allPosts)[0], "mdx" | "_meta">;
+
+const Simple01Horizontal = ({ article }: { article: Article }) => (
+	<div className="flex flex-col gap-4 xl:flex-row xl:items-start">
+		<div className="flex flex-col gap-5">
+			<div className="flex flex-col gap-2">
+				<span className="text-sm font-semibold text-brand-secondary">{article.tag[0]}</span>
+
+				<div className="flex flex-col gap-1">
+					<Link
+						to="/blog/$slug"
+						params={{ slug: article.slug }}
+						className="flex justify-between gap-x-4 rounded-md text-lg font-semibold text-primary outline-focus-ring focus-visible:outline-2 focus-visible:outline-offset-2 underline underline-offset-2 "
+					>
+						{article.title}
+					</Link>
+
+					<p className="line-clamp-2 text-md text-tertiary">{article.description}</p>
+				</div>
+			</div>
+
+			<p className="text-sm text-tertiary">{article.date}</p>
+		</div>
+	</div>
+);
+
+const getPosts = createServerFn({ method: "GET" }).handler(() =>
 	allPosts.map(({ mdx: _mdx, ...post }) => post).sort((a, b) => b.date.localeCompare(a.date)),
 );
 
@@ -13,27 +42,20 @@ export const Route = createFileRoute("/")({
 });
 
 function BlogIndex() {
-	const posts = Route.useLoaderData();
+	const articles = Route.useLoaderData();
+	const isDesktop = useBreakpoint("lg");
 
 	return (
-		<main className="page-wrap px-4 py-12">
-			<section className="island-shell rounded-2xl p-6 sm:p-8">
-				<p className="island-kicker mb-2">Blog</p>
-				<ul className="m-0 flex list-none flex-col gap-6 p-0">
-					{posts.map((post) => (
-						<li key={post.slug}>
-							<Link to="/blog/$slug" params={{ slug: post.slug }} className="group block">
-								<h2 className="mb-1 text-2xl font-bold text-[var(--sea-ink)] group-hover:underline">{post.title}</h2>
-								<p className="m-0 text-base leading-7 text-[var(--sea-ink-soft)]">{post.description}</p>
-								<p className="mt-1 mb-0 text-sm text-[var(--sea-ink-soft)]">
-									<time dateTime={post.date}>{post.date}</time>
-									{post.tag.length > 0 ? ` — ${post.tag.join(", ")}` : null}
-								</p>
-							</Link>
+		<div className="bg-primary py-16 md:py-24">
+			<section className="mx-auto flex w-full max-w-container flex-col gap-12 bg-primary px-4 pb-16 md:gap-16 md:px-8 md:pb-24">
+				<ul className="mx-auto grid grid-cols-1 gap-x-8 gap-y-12 sm:max-w-lg xl:max-w-3xl">
+					{articles.map((article) => (
+						<li key={article.slug} className={cx(!isDesktop && "nth-[n+7]:hidden")}>
+							<Simple01Horizontal article={article} />
 						</li>
 					))}
 				</ul>
 			</section>
-		</main>
+		</div>
 	);
 }

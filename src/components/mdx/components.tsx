@@ -2,6 +2,7 @@ import type { ComponentProps } from "react";
 import type { MDXComponents } from "mdx/types";
 import { Code } from "#/components/mdx/code";
 import { getAnchor } from "#/utils/get-anchor";
+import { Link } from "../base/link/link";
 
 // Body styling comes from the `.prose` rules in src/styles/typography.css —
 // this map only adds what prose can't: codehike blocks and heading anchors.
@@ -33,8 +34,13 @@ export const components: MDXComponents = {
 	},
 	a: ({ href, children, ...rest }: ComponentProps<"a">) => {
 		const isInternal = href?.startsWith("/");
+
+		if (isInternal) {
+			return <Link to={href}>{children}</Link>;
+		}
+
 		return (
-			<a href={href} {...(isInternal ? {} : { target: "_blank", rel: "noreferrer" })} {...rest}>
+			<a href={href} target="_blank" rel="noreferrer" {...rest}>
 				{children}
 			</a>
 		);

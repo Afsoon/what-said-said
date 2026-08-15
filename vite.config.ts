@@ -35,9 +35,14 @@ const config = defineConfig({
 			}),
 		},
 		cloudflare({ viteEnvironment: { name: "ssr", childEnvironments: ["rsc"] } }),
-		contentCollections({
-			environment: "ssr",
-		}),
+		{
+			...contentCollections({
+				environment: "ssr",
+			}),
+			// Vite dev only fires `buildStart` for the client env by default;
+			// this flag makes it fire for the ssr env too so the initial build runs.
+			perEnvironmentStartEndDuringDev: true,
+		},
 		tailwindcss(),
 		tanstackStart({
 			rsc: {
