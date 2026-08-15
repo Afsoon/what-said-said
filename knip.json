@@ -1,0 +1,13 @@
+{
+	"$schema": "https://unpkg.com/knip@5/schema.json",
+	"entry": ["src/router.tsx", "src/routes/**/*.tsx", "content-collections.ts"],
+	"project": ["src/**/*.{ts,tsx}", "*.{ts,tsx}"],
+	"ignore": ["src/routeTree.gen.ts", ".content-collections/**"],
+	"ignoreDependencies": [
+		"@tailwindcss/typography",
+		"tailwindcss-react-aria-components",
+		"tailwindcss-animate",
+		"tailwindcss",
+		"oxlint-tsgolint"
+	]
+}

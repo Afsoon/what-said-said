@@ -1,7 +1,3 @@
 import slugify from "@sindresorhus/slugify";
 
-export const getAnchor = (value: any) => {
-  const isString = typeof value === "string";
-
-  return isString ? slugify(value) : "";
-};
+export const getAnchor = (value: unknown) => (typeof value === "string" ? slugify(value) : "");
