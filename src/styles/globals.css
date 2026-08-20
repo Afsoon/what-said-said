@@ -28,6 +28,15 @@
 	transition-timing-function: inherit;
 }
 
+/* "Section N" kicker for <Scrollycoding> headers; counter resets per .prose (typography.css) */
+@utility scrolly-kicker {
+	counter-increment: scrolly-section;
+
+	&::before {
+		content: "Section " counter(scrolly-section);
+	}
+}
+
 html,
 body {
 	font-family: var(--font-body);
