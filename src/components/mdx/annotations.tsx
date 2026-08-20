@@ -1,5 +1,6 @@
 import type { CSSProperties, ReactNode } from "react";
 import { InnerLine, type AnnotationHandler } from "codehike/code";
+import { FileIcon } from "#/components/mdx/file-icon";
 import { cx } from "#/utils/cx";
 
 export const mark: AnnotationHandler = {
@@ -42,7 +43,10 @@ export function CodeFrame({
 	return (
 		<div className="overflow-hidden rounded-lg border border-secondary shadow-xs" style={style}>
 			<div className="flex items-center justify-between gap-2 border-b border-alpha-white/10 px-4 py-2">
-				<span className="truncate font-mono text-xs text-alpha-white/60">{title || "code"}</span>
+				<span className="flex min-w-0 items-center font-mono text-xs text-alpha-white/60">
+					<FileIcon filename={title || "code"} />
+					<span className="truncate">{title || "code"}</span>
+				</span>
 				{actions}
 			</div>
 			{children}

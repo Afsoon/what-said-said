@@ -47,7 +47,7 @@ export function Scrollycoding(props: unknown) {
 			{/* <lg: steps stacked, each step's code inline below it */}
 			<div className="flex flex-col gap-10 lg:hidden">
 				{steps.map((step, i) => (
-					<div key={`${i}-${step.title}`}>
+					<div key={`${i}-${step.title}`} className="min-w-0">
 						<div className="flex items-start gap-3">
 							<StepNumber n={i + 1} />
 							<div className="min-w-0">
@@ -64,7 +64,7 @@ export function Scrollycoding(props: unknown) {
 
 			{/* lg+: scroll-linked steps on the left, sticky morphing code panel on the right */}
 			<SelectionProvider className="relative hidden lg:flex lg:gap-12">
-				<div className="flex w-[42%] flex-col gap-6 py-4">
+				<div className="flex w-[42%] flex-col gap-6 ">
 					{steps.map((step, i) => (
 						<Selectable
 							key={`${i}-${step.title}`}
@@ -82,7 +82,7 @@ export function Scrollycoding(props: unknown) {
 						</Selectable>
 					))}
 				</div>
-				<div className="w-[58%]">
+				<div className="w-[58%] min-w-0">
 					<div className="sticky top-6">
 						<ScrollyCodePanel codes={highlighted} />
 					</div>
