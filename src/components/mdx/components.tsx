@@ -1,6 +1,7 @@
 import type { ComponentProps } from "react";
 import type { MDXComponents } from "mdx/types";
 import { Code } from "#/components/mdx/code";
+import { Scrollycoding } from "#/components/mdx/scrollycoding";
 import { getAnchor } from "#/utils/get-anchor";
 import { Link } from "../base/link/link";
 
@@ -8,6 +9,7 @@ import { Link } from "../base/link/link";
 // this map only adds what prose can't: codehike blocks and heading anchors.
 export const components: MDXComponents = {
 	Code,
+	Scrollycoding,
 	h2: ({ children, ...rest }: ComponentProps<"h2">) => {
 		const id = getAnchor(children);
 		return (

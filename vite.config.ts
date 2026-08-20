@@ -16,6 +16,8 @@ import { recmaCodeHike, remarkCodeHike, type CodeHikeConfig } from "codehike/mdx
 
 const chConfig: CodeHikeConfig = {
 	components: { code: "Code" },
+	// highlight at MDX compile time so no request pays for it (workerd included)
+	syntaxHighlighting: { theme: "github-dark" },
 };
 
 const config = defineConfig({
@@ -26,7 +28,14 @@ const config = defineConfig({
 		},
 	},
 	plugins: [
-		devtools(),
+		devtools({
+			injectSource: {
+				enabled: true,
+				// codehike's Inner* components merge sibling props and throw on
+				// unknown injected props like data-tsd-source
+				ignore: { files: [/src[\\/]components[\\/]mdx[\\/]/] },
+			},
+		}),
 		{
 			enforce: "pre",
 			...mdx({
