@@ -11,11 +11,14 @@ import contentCollections from "@content-collections/vite";
 import rsc from "@vitejs/plugin-rsc";
 import mdx from "@mdx-js/rollup";
 import remarkFrontmatter from "remark-frontmatter";
+import remarkGfm from "remark-gfm";
 import remarkMdxFrontmatter from "remark-mdx-frontmatter";
 import { recmaCodeHike, remarkCodeHike, type CodeHikeConfig } from "codehike/mdx";
 
 const chConfig: CodeHikeConfig = {
 	components: { code: "Code" },
+	// highlight at MDX compile time so no request pays for it (workerd included)
+	syntaxHighlighting: { theme: "github-dark" },
 };
 
 const config = defineConfig({
@@ -26,11 +29,18 @@ const config = defineConfig({
 		},
 	},
 	plugins: [
-		devtools(),
+		devtools({
+			injectSource: {
+				enabled: true,
+				// codehike's Inner* components merge sibling props and throw on
+				// unknown injected props like data-tsd-source
+				ignore: { files: [/src[\\/]components[\\/]mdx[\\/]/] },
+			},
+		}),
 		{
 			enforce: "pre",
 			...mdx({
-				remarkPlugins: [remarkFrontmatter, remarkMdxFrontmatter, [remarkCodeHike, chConfig]],
+				remarkPlugins: [remarkFrontmatter, remarkMdxFrontmatter, remarkGfm, [remarkCodeHike, chConfig]],
 				recmaPlugins: [[recmaCodeHike, chConfig]],
 			}),
 		},

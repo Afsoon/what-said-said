@@ -20,6 +20,9 @@
 	color: var(--tw-prose-body);
 	font-size: var(--text-md);
 	line-height: var(--text-md--line-height);
+
+	/* Numbering for <Scrollycoding> section headers (.scrolly-kicker in globals.css) */
+	counter-reset: scrolly-section;
 }
 
 .prose :not(:where([class~="not-prose"], [class~="not-prose"] *)) {

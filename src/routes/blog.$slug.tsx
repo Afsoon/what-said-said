@@ -4,6 +4,7 @@ import { renderServerComponent } from "@tanstack/react-start/rsc";
 import { allPosts } from "content-collections";
 import { components } from "#/components/mdx/components";
 import { useClipboard } from "#/hooks/use-clipboard";
+import { SITE_NAME, seo } from "#/utils/seo";
 import { Check, Copy01 } from "@untitledui/icons";
 import { BadgeGroup } from "@/components/base/badges/badge-groups";
 import { Button } from "@/components/base/buttons/button";
@@ -21,9 +22,18 @@ const getPost = createServerFn({ method: "GET" })
 
 export const Route = createFileRoute("/blog/$slug")({
 	loader: ({ params }) => getPost({ data: params.slug }),
-	head: ({ loaderData }) => ({
-		meta: [{ title: loaderData?.title }, { name: "description", content: loaderData?.description }],
-	}),
+	head: ({ loaderData }) =>
+		loaderData
+			? seo({
+					title: `${loaderData.title} | ${SITE_NAME}`,
+					description: loaderData.description,
+					path: `/blog/${loaderData.slug}`,
+					image: `/og/${loaderData.slug}.png`,
+					type: "article",
+					publishedTime: loaderData.date,
+					modifiedTime: loaderData.updated_at,
+				})
+			: {},
 	pendingComponent: () => <main className="page-wrap px-4 py-12">Loading…</main>,
 	notFoundComponent: () => <main className="page-wrap px-4 py-12">Post not found.</main>,
 	component: PostPage,
@@ -37,8 +47,8 @@ function PostPage() {
 		<div className="bg-primary">
 			<div className="mx-auto max-w-container px-4 py-16 md:px-8 md:py-24">
 				<div className="w-full max-w-3xl">
-					<BadgeGroup size="md" addonText="Tech" color="brand" theme="light" className="pr-3" iconTrailing={null}>
-						{article.tag[0]}
+					<BadgeGroup size="md" addonText="Tags" color="brand" theme="light" className="pr-3" iconTrailing={null}>
+						{article.tags.join(", ")}
 					</BadgeGroup>
 
 					<h1 className="mt-4 text-display-md font-semibold text-primary md:text-display-lg">{article.title}</h1>
