@@ -3,6 +3,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { allPosts } from "content-collections";
 import { useBreakpoint } from "@/hooks/use-breakpoint";
 import { cx } from "@/utils/cx";
+import { SITE_DESCRIPTION, SITE_NAME, seo } from "#/utils/seo";
 import { Link } from "#/components/base/link/link.tsx";
 
 type Article = Omit<(typeof allPosts)[0], "mdx" | "_meta">;
@@ -43,7 +44,7 @@ const getPosts = createServerFn({ method: "GET" }).handler(() =>
 
 export const Route = createFileRoute("/")({
 	loader: () => getPosts(),
-	head: () => ({ meta: [{ title: "Blog" }] }),
+	head: () => seo({ title: SITE_NAME, description: SITE_DESCRIPTION, path: "/", image: "/og/home.png" }),
 	component: BlogIndex,
 });
 
