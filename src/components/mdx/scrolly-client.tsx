@@ -16,7 +16,7 @@ import {
 	getStartingSnapshot,
 	type TokenTransitionsSnapshot,
 } from "codehike/utils/token-transitions";
-import { CodeFrame, lineNumbers, mark } from "#/components/mdx/annotations";
+import { CodeFrame, collapse, collapseContent, collapseTrigger, lineNumbers, mark } from "#/components/mdx/annotations";
 import { useClipboard } from "#/hooks/use-clipboard";
 
 export { Selectable, SelectionProvider } from "codehike/utils/selection";
@@ -102,7 +102,7 @@ export function ScrollyCodePanel({ codes }: { codes: HighlightedCode[] }) {
 		>
 			<Pre
 				code={code}
-				handlers={[tokenTransitions, mark, lineNumbers]}
+				handlers={[tokenTransitions, mark, lineNumbers, collapse, collapseTrigger, collapseContent]}
 				className="m-0 max-h-[calc(100vh-8rem)] overflow-auto p-4 font-mono text-sm"
 			/>
 		</CodeFrame>
@@ -120,7 +120,11 @@ export function StepCode({ code }: { code: HighlightedCode }) {
 			actions={<CopyButton text={code.code} />}
 			style={{ background: code.style?.background }}
 		>
-			<Pre code={code} handlers={[mark, lineNumbers]} className="m-0 overflow-x-auto p-4 font-mono text-sm" />
+			<Pre
+				code={code}
+				handlers={[mark, lineNumbers, collapse, collapseTrigger, collapseContent]}
+				className="m-0 overflow-x-auto p-4 font-mono text-sm"
+			/>
 		</CodeFrame>
 	);
 }

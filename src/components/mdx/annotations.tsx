@@ -1,6 +1,8 @@
 import type { CSSProperties, ReactNode } from "react";
-import { InnerLine, type AnnotationHandler } from "codehike/code";
+import { ChevronDown } from "@untitledui/icons";
+import { InnerLine, type AnnotationHandler, type BlockAnnotation } from "codehike/code";
 import { FileIcon } from "#/components/mdx/file-icon";
+import { Button, Disclosure, DisclosurePanel } from "#/components/mdx/rac-client";
 import { cx } from "#/utils/cx";
 
 export const mark: AnnotationHandler = {
@@ -25,6 +27,59 @@ export const lineNumbers: AnnotationHandler = {
 			</>
 		);
 	},
+};
+
+// `!collapse(N:M)` folds a code region behind its first line; append ` collapsed`
+// to start folded. Port of codehike's collapse recipe onto react-aria Disclosure.
+export const collapse: AnnotationHandler = {
+	name: "collapse",
+	transform: (annotation: BlockAnnotation) => {
+		const { fromLineNumber } = annotation;
+		return [
+			annotation,
+			{ ...annotation, fromLineNumber, toLineNumber: fromLineNumber, name: "CollapseTrigger" },
+			{ ...annotation, fromLineNumber: fromLineNumber + 1, name: "CollapseContent" },
+		];
+	},
+	Block: ({ annotation, children }) => (
+		<Disclosure defaultExpanded={annotation.query !== "collapsed"} className="group/collapse">
+			{children}
+		</Disclosure>
+	),
+};
+
+export const collapseTrigger: AnnotationHandler = {
+	name: "CollapseTrigger",
+	onlyIfAnnotated: true,
+	AnnotatedLine: ({ annotation: _annotation, ...props }) => (
+		<Button slot="trigger" className="block w-full cursor-pointer text-left">
+			<InnerLine
+				merge={props}
+				data={{
+					icon: (
+						<ChevronDown
+							aria-hidden
+							className="size-3.5 shrink-0 -rotate-90 text-alpha-white/60 transition-transform group-data-expanded/collapse:rotate-0"
+						/>
+					),
+				}}
+			/>
+		</Button>
+	),
+	Line: (props) => {
+		const icon = props.data?.icon as ReactNode;
+		return (
+			<div className="flex items-center">
+				{icon}
+				<InnerLine merge={props} className="min-w-0 flex-1" />
+			</div>
+		);
+	},
+};
+
+export const collapseContent: AnnotationHandler = {
+	name: "CollapseContent",
+	Block: ({ children }) => <DisclosurePanel>{children}</DisclosurePanel>,
 };
 
 // Chrome shared by every code panel; stays github-dark on both themes, so the

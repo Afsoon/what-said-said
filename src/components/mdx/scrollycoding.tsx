@@ -42,7 +42,9 @@ export function Scrollycoding(props: unknown) {
 			) : null}
 			{/* Section description: prose between the opening tag and the first `## !!steps`.
 			    Note: we're inside not-prose, so typography.css inline-code styling doesn't apply here. */}
-			{children ? <div className="mb-10 flex max-w-180 flex-col gap-3 text-lg text-tertiary">{children}</div> : null}
+			{children ? (
+				<div className="scrolly-prose mb-10 flex max-w-180 flex-col gap-3 text-lg text-tertiary">{children}</div>
+			) : null}
 
 			{/* <lg: steps stacked, each step's code inline below it */}
 			<div className="flex flex-col gap-10 lg:hidden">
@@ -52,7 +54,7 @@ export function Scrollycoding(props: unknown) {
 							<StepNumber n={i + 1} />
 							<div className="min-w-0">
 								<h3 className="text-lg font-semibold text-primary">{step.title}</h3>
-								<div className="mt-2 flex flex-col gap-3 text-md text-tertiary">{step.children}</div>
+								<div className="scrolly-prose mt-2 flex flex-col gap-3 text-md text-tertiary">{step.children}</div>
 							</div>
 						</div>
 						<div className="mt-4">
@@ -76,7 +78,7 @@ export function Scrollycoding(props: unknown) {
 								<StepNumber n={i + 1} />
 								<div className="min-w-0">
 									<h3 className="text-lg font-semibold text-primary">{step.title}</h3>
-									<div className="mt-2 flex flex-col gap-3 text-md text-tertiary">{step.children}</div>
+									<div className="scrolly-prose mt-2 flex flex-col gap-3 text-md text-tertiary">{step.children}</div>
 								</div>
 							</div>
 						</Selectable>

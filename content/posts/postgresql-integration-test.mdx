@@ -1,0 +1,648 @@
+---
+title: "How to setup PostgreSQL for integration tests using IntegreSQL and Testcontainers"
+description: "Fast PostgreSQL integration tests with Testcontainers and IntegreSQL"
+date: "2026-08-20"
+updated_at: null
+tags: ["Testing", "NodeJS", "PostgreSQL"]
+---
+
+At `$JOB` I'm refactoring one of the microservices, but something that has been bothering me is how the persistence layer is handled in our tests. Our microservices use PostgreSQL as database, so our testing database client was a map, and our analytical queries can only be verified in E2E tests.
+
+I won't dig too much in different strategies to write integration tests with PostgreSQL, I'm leaving [this article that explains it](https://gajus.com/blog/setting-up-postgre-sql-for-running-integration-tests). The core of the new architecture is [IntegreSQL](https://github.com/allaboutapps/integresql), it's a Go service that creates a pool of databases to be used in tests, those databases are created from a template. The new test architecture is based on **Vitest**, **Testcontainers** and **IntegreSQL**. Why this stack:
+
+- **We are moving from CJS to ESM**: Jest is still not 100% compatible with ESM.
+- **Testing flows that are sensitive to read replicas**: I'm talking about read-after-write paths. My team is adding read replicas, and some flows have internally this read-after-write problem. This was the deal-breaker for not using [PGLite](https://pglite.dev/).
+- **Less mocks is better**: Mocks are helpful, but used with caution. Every mock is a code path left untested.
+- **High end work computer**: Each team member has a M4 Pro MacBook Pro 14" with 24GB RAM, so running this test suite won't be slow.
+- **Migrate E2E test to integration tests**: several of our E2E tests are really integration tests. This mostly affected our analytical queries.
+
+For the sake of this post, I have vibecode a `metered usage microservice` in NodeJS. This demo lacks of read replica, but uses TimescaleDB as database. Timescale is used just to justify this setup, as in more simple setup I would have used PGLite. The two important files [are how timescale (postgresql) is started](https://github.com/Afsoon/demo-post-node-integresql/blob/main/test/globalSetup.ts) and [how the database connection is started per test](https://github.com/Afsoon/demo-post-node-integresql/blob/main/test/support/database.ts).
+
+To keep this post as agnostic as possible, I will only focus on how to configure the Postgresql container to be fast, and how to configure IntegreSQL to interact with it. If you want an example on NodeJS you can use [the demo repository as reference](https://github.com/Afsoon/demo-post-node-integresql). Let's get hands on.
+
+<Scrollycoding title="Making Timescale (PostgreSQL) fast">
+
+By default PostgreSQL is initialized with defaults to avoid data corruption, but this safeguard comes at the cost of performance. **IMPORTANT** The proposed configuration **SHOULD NOT** be used in production, unless you want to have corrupted data.
+
+## !!steps Define the base Timescale image
+
+Our starting point will be a base definition of a Timescale container. From here, the following steps will deactivate the data-integrity safeguards and skip non-essential work. Our database is ready once the log `database system is ready to accept connections` shows twice.
+
+```ts ! globalSetup.ts
+import { GenericContainer, Wait } from "testcontainers";
+
+const TIMESCALE_IMAGE = "timescale/timescaledb:2.29.2-pg18";
+const TIMESCALE_CONTAINER_PORT = 5432;
+const TIMESCALE_ENV = { user: "metered", password: "metered", database: "metered" };
+
+function startTimescale() {
+	return new GenericContainer(TIMESCALE_IMAGE)
+		.withLabels({ "demo.blog.service": "metered", "demo.blog.role": "test-db" })
+		.withEnvironment({
+			POSTGRES_USER: TIMESCALE_ENV.user,
+			POSTGRES_PASSWORD: TIMESCALE_ENV.password,
+			POSTGRES_DB: TIMESCALE_ENV.database,
+		})
+		.withExposedPorts(TIMESCALE_CONTAINER_PORT)
+		.withWaitStrategy(Wait.forLogMessage(/database system is ready to accept connections/, 2))
+		.start();
+}
+```
+
+## !!steps Turn off durability safeguards
+
+Our databases are short-lived and discarded on testing completion. So we don't want to lose time committing the data on disk.
+
+```ts ! globalSetup.ts
+import { GenericContainer, Wait } from "testcontainers";
+
+const TIMESCALE_IMAGE = "timescale/timescaledb:2.29.2-pg18";
+const TIMESCALE_CONTAINER_PORT = 5432;
+const TIMESCALE_ENV = { user: "metered", password: "metered", database: "metered" };
+
+function startTimescale() {
+	return new GenericContainer(TIMESCALE_IMAGE)
+		.withLabels({ "demo.blog.service": "metered", "demo.blog.role": "test-db" })
+		.withEnvironment({
+			POSTGRES_USER: TIMESCALE_ENV.user,
+			POSTGRES_PASSWORD: TIMESCALE_ENV.password,
+			POSTGRES_DB: TIMESCALE_ENV.database,
+		})
+		.withCommand([
+			"postgres",
+			"-c",
+			// !mark(1:7)
+			"fsync=off",
+			"-c",
+			"synchronous_commit=off",
+			"-c",
+			"full_page_writes=off",
+			"-c",
+		])
+		.withExposedPorts(TIMESCALE_CONTAINER_PORT)
+		.withWaitStrategy(Wait.forLogMessage(/database system is ready to accept connections/, 2))
+		.start();
+}
+```
+
+## !!steps Deactivating the replication features
+
+Only add these options if your test suite isn't testing read replicas or WAL consumers. In that case, they reduce WAL work to a minimum.
+
+```ts ! globalSetup.ts
+import { GenericContainer, Wait } from "testcontainers";
+
+const TIMESCALE_IMAGE = "timescale/timescaledb:2.29.2-pg18";
+const TIMESCALE_CONTAINER_PORT = 5432;
+const TIMESCALE_ENV = { user: "metered", password: "metered", database: "metered" };
+
+function startTimescale() {
+	return new GenericContainer(TIMESCALE_IMAGE)
+		.withLabels({ "demo.blog.service": "metered", "demo.blog.role": "test-db" })
+		.withEnvironment({
+			POSTGRES_USER: TIMESCALE_ENV.user,
+			POSTGRES_PASSWORD: TIMESCALE_ENV.password,
+			POSTGRES_DB: TIMESCALE_ENV.database,
+		})
+		.withCommand([
+			"postgres",
+			"-c",
+			"fsync=off",
+			"-c",
+			"synchronous_commit=off",
+			"-c",
+			"full_page_writes=off",
+			// !mark(1:8)
+			"-c",
+			"wal_level=minimal",
+			"-c",
+			"max_wal_senders=0",
+			"-c",
+			"archive_mode=off",
+			"-c",
+			"summarize_wal=off",
+		])
+		.withExposedPorts(TIMESCALE_CONTAINER_PORT)
+		.withWaitStrategy(Wait.forLogMessage(/database system is ready to accept connections/, 2))
+		.start();
+}
+```
+
+## !!steps Deactivating any background work
+
+Our databases live for a few seconds, processes like autovacuum aren't necessary and will burn CPU for nothing.
+
+```ts ! globalSetup.ts
+import { GenericContainer, Wait } from "testcontainers";
+
+const TIMESCALE_IMAGE = "timescale/timescaledb:2.29.2-pg18";
+const TIMESCALE_CONTAINER_PORT = 5432;
+const TIMESCALE_ENV = { user: "metered", password: "metered", database: "metered" };
+
+function startTimescale() {
+	return new GenericContainer(TIMESCALE_IMAGE)
+		.withLabels({ "demo.blog.service": "metered", "demo.blog.role": "test-db" })
+		.withEnvironment({
+			POSTGRES_USER: TIMESCALE_ENV.user,
+			POSTGRES_PASSWORD: TIMESCALE_ENV.password,
+			POSTGRES_DB: TIMESCALE_ENV.database,
+		})
+		.withCommand([
+			"postgres",
+			"-c",
+			"fsync=off",
+			"-c",
+			"synchronous_commit=off",
+			"-c",
+			"full_page_writes=off",
+			"-c",
+			"wal_level=minimal",
+			"-c",
+			"max_wal_senders=0",
+			"-c",
+			"archive_mode=off",
+			"-c",
+			"summarize_wal=off",
+			// !mark(1:4)
+			"-c",
+			"autovacuum=off",
+			"-c",
+			"timescaledb.max_background_workers=0",
+		])
+		.withExposedPorts(TIMESCALE_CONTAINER_PORT)
+		.withWaitStrategy(Wait.forLogMessage(/database system is ready to accept connections/, 2))
+		.start();
+}
+```
+
+## !!steps Persisting our data in memory
+
+Our data lives in memory, Postgres data folder is mounted in memory using [tmpfs](https://docs.docker.com/engine/storage/tmpfs/). Since the data is in memory, we set `random_page_cost=1.1`, which hints the query planner to prefer index scans.
+
+```ts ! globalSetup.ts
+import { GenericContainer, Wait } from "testcontainers";
+
+const TIMESCALE_IMAGE = "timescale/timescaledb:2.29.2-pg18";
+const TIMESCALE_CONTAINER_PORT = 5432;
+const TIMESCALE_ENV = { user: "metered", password: "metered", database: "metered" };
+// !mark(1:1)
+const TIMESCALE_DATA_DIR = "/var/lib/postgresql";
+
+function startTimescale() {
+	return (
+		new GenericContainer(TIMESCALE_IMAGE)
+			.withLabels({ "demo.blog.service": "metered", "demo.blog.role": "test-db" })
+			.withEnvironment({
+				POSTGRES_USER: TIMESCALE_ENV.user,
+				POSTGRES_PASSWORD: TIMESCALE_ENV.password,
+				POSTGRES_DB: TIMESCALE_ENV.database,
+			})
+			.withCommand([
+				"postgres",
+				"-c",
+				"fsync=off",
+				"-c",
+				"synchronous_commit=off",
+				"-c",
+				"full_page_writes=off",
+				"-c",
+				"wal_level=minimal",
+				"-c",
+				"max_wal_senders=0",
+				"-c",
+				"archive_mode=off",
+				"-c",
+				"summarize_wal=off",
+				"-c",
+				"autovacuum=off",
+				"-c",
+				"timescaledb.max_background_workers=0",
+				// !mark(1:2)
+				"-c",
+				"random_page_cost=1.1",
+			])
+			// !mark(1:1)
+			.withTmpFs({ [TIMESCALE_DATA_DIR]: "rw,noexec,nosuid,size=3g" })
+			.withExposedPorts(TIMESCALE_CONTAINER_PORT)
+			.withWaitStrategy(Wait.forLogMessage(/database system is ready to accept connections/, 2))
+			.start()
+	);
+}
+```
+
+## !!steps Deactivating JIT
+
+We are deactivating JIT because the cost of optimizing our queries doesn't pay off.
+
+```ts ! globalSetup.ts
+import { GenericContainer, Wait } from "testcontainers";
+
+const TIMESCALE_IMAGE = "timescale/timescaledb:2.29.2-pg18";
+const TIMESCALE_CONTAINER_PORT = 5432;
+const TIMESCALE_ENV = { user: "metered", password: "metered", database: "metered" };
+const TIMESCALE_DATA_DIR = "/var/lib/postgresql";
+
+function startTimescale() {
+	return new GenericContainer(TIMESCALE_IMAGE)
+		.withLabels({ "demo.blog.service": "metered", "demo.blog.role": "test-db" })
+		.withEnvironment({
+			POSTGRES_USER: TIMESCALE_ENV.user,
+			POSTGRES_PASSWORD: TIMESCALE_ENV.password,
+			POSTGRES_DB: TIMESCALE_ENV.database,
+		})
+		.withCommand([
+			"postgres",
+			"-c",
+			"fsync=off",
+			"-c",
+			"synchronous_commit=off",
+			"-c",
+			"full_page_writes=off",
+			"-c",
+			"wal_level=minimal",
+			"-c",
+			"max_wal_senders=0",
+			"-c",
+			"archive_mode=off",
+			"-c",
+			"summarize_wal=off",
+			"-c",
+			"autovacuum=off",
+			"-c",
+			"timescaledb.max_background_workers=0",
+			"-c",
+			"random_page_cost=1.1",
+			// !mark(1:2)
+			"-c",
+			"jit=off",
+		])
+		.withTmpFs({ [TIMESCALE_DATA_DIR]: "rw,noexec,nosuid,size=3g" })
+		.withExposedPorts(TIMESCALE_CONTAINER_PORT)
+		.withWaitStrategy(Wait.forLogMessage(/database system is ready to accept connections/, 2))
+		.start();
+}
+```
+
+## !!steps Prepare PostgreSQL for hundreds of short-lived databases
+
+This step isn't performance related but it's **important**. `max_connections` must be higher than `pool * (test concurrency * threads)`. For example: my demo with a pool of 4 connections, the test suite running in 8 threads, and each thread executes 1 test concurrently, so our formula is `4 * (1 * 8)=32`. Add some headroom for IntegreSQL's connections, that's why the code over-provisions to 300.
+
+```ts ! globalSetup.ts
+import { GenericContainer, Wait } from "testcontainers";
+
+const TIMESCALE_IMAGE = "timescale/timescaledb:2.29.2-pg18";
+const TIMESCALE_CONTAINER_PORT = 5432;
+const TIMESCALE_ENV = { user: "metered", password: "metered", database: "metered" };
+const TIMESCALE_DATA_DIR = "/var/lib/postgresql";
+
+function startTimescale() {
+	return new GenericContainer(TIMESCALE_IMAGE)
+		.withLabels({ "demo.blog.service": "metered", "demo.blog.role": "test-db" })
+		.withEnvironment({
+			POSTGRES_USER: TIMESCALE_ENV.user,
+			POSTGRES_PASSWORD: TIMESCALE_ENV.password,
+			POSTGRES_DB: TIMESCALE_ENV.database,
+		})
+		.withCommand([
+			"postgres",
+			"-c",
+			"fsync=off",
+			"-c",
+			"synchronous_commit=off",
+			"-c",
+			"full_page_writes=off",
+			"-c",
+			"checkpoint_timeout=5min",
+			"-c",
+			"max_wal_size=1GB",
+			"-c",
+			"wal_level=minimal",
+			"-c",
+			"max_wal_senders=0",
+			"-c",
+			"archive_mode=off",
+			"-c",
+			"summarize_wal=off",
+			"-c",
+			"autovacuum=off",
+			"-c",
+			"timescaledb.max_background_workers=0",
+			"-c",
+			"random_page_cost=1.1",
+			"-c",
+			"jit=off",
+			// !mark(1:2)
+			"-c",
+			"max_connections=300",
+		])
+		.withTmpFs({ [TIMESCALE_DATA_DIR]: "rw,noexec,nosuid,size=3g" })
+		.withExposedPorts(TIMESCALE_CONTAINER_PORT)
+		.withWaitStrategy(Wait.forLogMessage(/database system is ready to accept connections/, 2))
+		.start();
+}
+```
+
+## !!steps Setting up unix socket for IntegreSQL
+
+These gains are cumulative, the more tests you are executing, the higher the savings. IntegreSQL will reach Postgres through the unix socket in our shared mount, saving the TCP handshake roundtrip.
+
+```ts ! globalSetup.ts
+import { GenericContainer, Wait } from "testcontainers";
+
+const TIMESCALE_IMAGE = "timescale/timescaledb:2.29.2-pg18";
+const TIMESCALE_CONTAINER_PORT = 5432;
+const TIMESCALE_ENV = { user: "metered", password: "metered", database: "metered" };
+const TIMESCALE_DATA_DIR = "/var/lib/postgresql";
+// !mark(1:3)
+const TIMESCALE_SOCKET_VOLUME = "metered-test-pgsock";
+const TIMESCALE_SOCKET_DIR = "/var/run/postgresql";
+const socketMount = { source: TIMESCALE_SOCKET_VOLUME, target: TIMESCALE_SOCKET_DIR };
+
+function startTimescale() {
+	return (
+		new GenericContainer(TIMESCALE_IMAGE)
+			.withLabels({ "demo.blog.service": "metered", "demo.blog.role": "test-db" })
+			.withEnvironment({
+				POSTGRES_USER: TIMESCALE_ENV.user,
+				POSTGRES_PASSWORD: TIMESCALE_ENV.password,
+				POSTGRES_DB: TIMESCALE_ENV.database,
+			})
+			// !collapse(1:30) collapsed
+			.withCommand([
+				"postgres",
+				"-c",
+				"fsync=off",
+				"-c",
+				"synchronous_commit=off",
+				"-c",
+				"full_page_writes=off",
+				"-c",
+				"checkpoint_timeout=5min",
+				"-c",
+				"max_wal_size=1GB",
+				"-c",
+				"wal_level=minimal",
+				"-c",
+				"max_wal_senders=0",
+				"-c",
+				"archive_mode=off",
+				"-c",
+				"summarize_wal=off",
+				"-c",
+				"autovacuum=off",
+				"-c",
+				"timescaledb.max_background_workers=0",
+				"-c",
+				"random_page_cost=1.1",
+				"-c",
+				"jit=off",
+				"-c",
+				"max_connections=300",
+			])
+			.withTmpFs({ [TIMESCALE_DATA_DIR]: "rw,noexec,nosuid,size=3g" })
+			// !mark(1:1)
+			.withBindMounts([socketMount])
+			.withExposedPorts(TIMESCALE_CONTAINER_PORT)
+			.withWaitStrategy(Wait.forLogMessage(/database system is ready to accept connections/, 2))
+			.start()
+	);
+}
+```
+
+</Scrollycoding>
+
+<Scrollycoding title="Setting up IntegreSQL and interacting with it">
+
+This section focuses on configuring IntegreSQL, and how to configure our test database client to use one of our databases.
+
+## !!steps Define the base IntegreSQL image configuration
+
+Our base definition only needs the API port, and Postgres credentials. `PGHOST` is the unix socket in our shared mount created previously.
+
+```ts ! globalSetup.ts
+import { GenericContainer, Wait } from "testcontainers";
+
+const INTEGRESQL_IMAGE = "ghcr.io/allaboutapps/integresql:v1.1.0";
+const TIMESCALE_CONTAINER_PORT = 5432;
+const INTEGRESQL_CONTAINER_PORT = 5000;
+const TIMESCALE_ENV = { user: "metered", password: "metered", database: "metered" };
+// !mark(1:3)
+const TIMESCALE_SOCKET_VOLUME = "metered-test-pgsock";
+const TIMESCALE_SOCKET_DIR = "/var/run/postgresql";
+const socketMount = { source: TIMESCALE_SOCKET_VOLUME, target: TIMESCALE_SOCKET_DIR };
+
+function startIntegresql() {
+	return (
+		new GenericContainer(INTEGRESQL_IMAGE)
+			.withLabels({ "demo.blog.service": "metered", "demo.blog.role": "test-integresql" })
+			.withEnvironment({
+				INTEGRESQL_PORT: String(INTEGRESQL_CONTAINER_PORT),
+				// !mark(1:2)
+				//Remember to use the socket, not the TCP URL
+				PGHOST: TIMESCALE_SOCKET_DIR,
+				PGPORT: String(TIMESCALE_CONTAINER_PORT),
+				PGUSER: TIMESCALE_ENV.user,
+				PGPASSWORD: TIMESCALE_ENV.password,
+				PGDATABASE: TIMESCALE_ENV.database,
+			})
+			// !mark(1:1)
+			.withBindMounts([socketMount])
+			.withExposedPorts(INTEGRESQL_CONTAINER_PORT)
+			.withWaitStrategy(Wait.forLogMessage(/http server started/))
+			.start()
+	);
+}
+```
+
+## !!steps Tuning the pool
+
+Sadly, I don't have a formula for `INTEGRESQL_TEST_INITIAL_POOL_SIZE` and `INTEGRESQL_TEST_MAX_POOL_SIZE`. My tip is `INTEGRESQL_TEST_INITIAL_POOL_SIZE=threads * test concurrency * 2`, and the max pool size between 4-6 times the initial pool size. At the cost of RAM, we will avoid stalled tests waiting for a ready database. IntegreSQL removes dirty databases on an interval basis.
+
+```ts ! globalSetup.ts
+import { GenericContainer, Wait } from "testcontainers";
+
+const INTEGRESQL_IMAGE = "ghcr.io/allaboutapps/integresql:v1.1.0";
+const TIMESCALE_CONTAINER_PORT = 5432;
+const INTEGRESQL_CONTAINER_PORT = 5000;
+const TIMESCALE_ENV = { user: "metered", password: "metered", database: "metered" };
+const TIMESCALE_SOCKET_VOLUME = "metered-test-pgsock";
+const TIMESCALE_SOCKET_DIR = "/var/run/postgresql";
+const socketMount = { source: TIMESCALE_SOCKET_VOLUME, target: TIMESCALE_SOCKET_DIR };
+
+function startIntegresql() {
+	return new GenericContainer(INTEGRESQL_IMAGE)
+		.withLabels({ "demo.blog.service": "metered", "demo.blog.role": "test-integresql" })
+		.withEnvironment({
+			INTEGRESQL_PORT: String(INTEGRESQL_CONTAINER_PORT),
+			// !mark(1:2)
+			INTEGRESQL_TEST_INITIAL_POOL_SIZE: "16",
+			INTEGRESQL_TEST_MAX_POOL_SIZE: "96",
+			//Remember to use the socket, not the TCP URL
+			PGHOST: TIMESCALE_SOCKET_DIR,
+			PGPORT: String(TIMESCALE_CONTAINER_PORT),
+			PGUSER: TIMESCALE_ENV.user,
+			PGPASSWORD: TIMESCALE_ENV.password,
+			PGDATABASE: TIMESCALE_ENV.database,
+		})
+		.withBindMounts([socketMount])
+		.withExposedPorts(INTEGRESQL_CONTAINER_PORT)
+		.withWaitStrategy(Wait.forLogMessage(/http server started/))
+		.start();
+}
+```
+
+## !!steps Start your containers and hash your migration files
+
+Hashing our migration files lets IntegreSQL reuse the template linked to the hash. If the hash doesn't exist, then the migrations are executed. Add the returned object to your runner context (Vitest is `project.provide()` and `project.inject()`).
+
+```ts ! globalSetup.ts
+import { GenericContainer, Wait } from "testcontainers";
+import { IntegreSQLClient } from "@devoxa/integresql-client";
+
+const INTEGRESQL_IMAGE = "ghcr.io/allaboutapps/integresql:v1.1.0";
+const TIMESCALE_CONTAINER_PORT = 5432;
+const INTEGRESQL_CONTAINER_PORT = 5000;
+const TIMESCALE_ENV = { user: "metered", password: "metered", database: "metered" };
+const TIMESCALE_SOCKET_VOLUME = "metered-test-pgsock";
+const TIMESCALE_SOCKET_DIR = "/var/run/postgresql";
+const socketMount = { source: TIMESCALE_SOCKET_VOLUME, target: TIMESCALE_SOCKET_DIR };
+
+// !mark(1:1)
+const SCHEMA_FILES = ["drizzle/**/*.sql", "drizzle/**/*.json"];
+
+// !mark(1:17)
+export default async function setup() {
+	const timescale = await startTimescale();
+	const host = timescale.getHost();
+	const port = timescale.getMappedPort(TIMESCALE_CONTAINER_PORT);
+
+	const integresql = await startIntegresql();
+
+	const url = `http://${integresql.getHost()}:${integresql.getMappedPort(INTEGRESQL_CONTAINER_PORT)}`;
+	const client = new IntegreSQLClient({ url });
+	const templateHash = await client.hashFiles(SCHEMA_FILES);
+
+	await client.initializeTemplate(templateHash, async (templateConfig) => {
+		//Here goes your code to run migrations
+	});
+
+	return { url, host, port, templateHash };
+}
+
+function startIntegresql() {
+	return new GenericContainer(INTEGRESQL_IMAGE)
+		.withLabels({ "demo.blog.service": "metered", "demo.blog.role": "test-integresql" })
+		.withEnvironment({
+			INTEGRESQL_PORT: String(INTEGRESQL_CONTAINER_PORT),
+			INTEGRESQL_TEST_INITIAL_POOL_SIZE: "16",
+			INTEGRESQL_TEST_MAX_POOL_SIZE: "96",
+			//Remember to use the socket, not the TCP URL
+			PGHOST: TIMESCALE_SOCKET_DIR,
+			PGPORT: String(TIMESCALE_CONTAINER_PORT),
+			PGUSER: TIMESCALE_ENV.user,
+			PGPASSWORD: TIMESCALE_ENV.password,
+			PGDATABASE: TIMESCALE_ENV.database,
+		})
+		.withBindMounts([socketMount])
+		.withExposedPorts(INTEGRESQL_CONTAINER_PORT)
+		.withWaitStrategy(Wait.forLogMessage(/http server started/))
+		.start();
+}
+```
+
+## !!steps Fetch the database credentials
+
+Before establishing your Postgres connection, we must fetch from IntegreSQL the database credentials for the first ready database.
+
+```ts ! test/database.ts
+import { IntegreSQLClient } from "@devoxa/integresql-client";
+import { createDb } from "../../src/infra/db/client.ts";
+
+type IntegresqlContext = { url: string; host: string; port: number; templateHash: string };
+
+export async function createTestDatabase(ctx: IntegresqlContext) {
+	const client = new IntegreSQLClient({ url: ctx.url });
+
+	const { id, database } = await client.api.getTestDatabase(ctx.templateHash);
+
+	const url = client.databaseConfigToConnectionUrl({
+		...database.config,
+		host: ctx.host,
+		port: ctx.port,
+	});
+	const { db, pool } = createDb(url, { max: Number(process.env.TEST_PG_POOL_MAX ?? 4) });
+
+	return {
+		db,
+		pool,
+		url,
+	};
+}
+
+export type TestDatabase = Awaited<ReturnType<typeof createTestDatabase>>;
+```
+
+## !!steps On test completion
+
+This is the weakest point of IntegreSQL. IntegreSQL **never** knows when a database is free, so its heuristics are based on time or pool starvation. So you can do nothing (`release`), reuse it after a read-only test (`reuse`), or recreate your current database (`recreate`). Recreation and reusing hand the database back to the pool. A big test suite that only calls release can starve the pool real fast.
+
+```ts ! test/database.ts
+import { IntegreSQLClient } from "@devoxa/integresql-client";
+import { createDb } from "../../src/infra/db/client.ts";
+
+type IntegresqlContext = { url: string; host: string; port: number; templateHash: string };
+
+export async function createTestDatabase(ctx: IntegresqlContext) {
+	const client = new IntegreSQLClient({ url: ctx.url });
+
+	const { id, database } = await client.api.getTestDatabase(ctx.templateHash);
+
+	const url = client.databaseConfigToConnectionUrl({
+		...database.config,
+		host: ctx.host,
+		port: ctx.port,
+	});
+	const { db, pool } = createDb(url, { max: Number(process.env.TEST_PG_POOL_MAX ?? 4) });
+
+	return {
+		db,
+		pool,
+		url,
+		// !mark(1:11)
+		async release() {
+			await pool.end();
+		},
+		async reuse() {
+			await pool.end();
+			await client.api.reuseTestDatabase(ctx.templateHash, id);
+		},
+		async recreate() {
+			await pool.end();
+			await client.api.recreateTestDatabase(ctx.templateHash, id);
+		},
+	};
+}
+
+export type TestDatabase = Awaited<ReturnType<typeof createTestDatabase>>;
+```
+
+</Scrollycoding>
+
+## Conclusion
+
+If you have made it this far, one question remains: is it fast enough? The demo repository consists of:
+
+- **15 Files**: Each file runs in its own worker thread.
+- **226 Tests**: Each test fetches a ready database and hands it back on completion.
+
+| Machine                             | Suite           | Time                   |
+| ----------------------------------- | --------------- | ---------------------- |
+| M1 Pro MacBook Pro, 32GB            | demo, 226 tests | ~10s                   |
+| GitHub Actions, 1 shard of 3 shards | demo            | ~12s                   |
+| M4 Pro MacBook Pro, 24GB (`$JOB`)   | 317 tests       | ~7.4s warm, ~9.9s cold |
+
+Some will argue that these numbers aren't acceptable, because mocks are faster. True, and speed is its major drawback. But with a long test suite, you will run a subset of tests. Here we are exchanging time in favour of safety, especially in this era of LLMs generating code. I'd rather lose a few seconds than getting paged because of a bug the mocks never covered and E2E never reached.
+
+Since migrating, I have found bugs the old test suite never detected. On top of that, I can test read-after-write flows.
+
+To conclude, reach this setup only if you can't replicate it using PGlite. At the time of writing, PGlite supports [84 postgres extensions](https://pglite.dev/extensions/), and since last year [you can clone a PGlite database](https://github.com/electric-sql/pglite/pull/526), this means you don't need to apply the migrations over and over.

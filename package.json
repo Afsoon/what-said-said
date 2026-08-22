@@ -57,6 +57,7 @@
 		"oxlint": "^1.78.0",
 		"oxlint-tsgolint": "^7.0.2001",
 		"remark-frontmatter": "^5.0.0",
+		"remark-gfm": "^4.0.1",
 		"remark-mdx-frontmatter": "^5.2.0",
 		"typescript": "^7.0.2",
 		"vite": "^8.2.1",

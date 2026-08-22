@@ -1,4 +1,5 @@
 import { Pre, type HighlightedCode } from "codehike/code";
+import { collapse, collapseContent, collapseTrigger, mark } from "#/components/mdx/annotations";
 
 // codeblock arrives pre-highlighted from the build (syntaxHighlighting in vite.config.ts)
 export function Code({ codeblock }: { codeblock: HighlightedCode }) {
@@ -7,6 +8,7 @@ export function Code({ codeblock }: { codeblock: HighlightedCode }) {
 			<Pre
 				className="m-0 overflow-x-auto p-3 text-sm"
 				code={codeblock}
+				handlers={[mark, collapse, collapseTrigger, collapseContent]}
 				style={{ background: codeblock.style?.background }}
 			/>
 		</div>

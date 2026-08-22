@@ -11,7 +11,7 @@ const Simple01Horizontal = ({ article }: { article: Article }) => (
 	<div className="flex flex-col gap-4 xl:flex-row xl:items-start">
 		<div className="flex flex-col gap-5">
 			<div className="flex flex-col gap-2">
-				<span className="text-sm font-semibold text-brand-secondary">{article.tag[0]}</span>
+				<span className="text-sm font-semibold text-brand-secondary">{article.tags[0]}</span>
 
 				<div className="flex flex-col gap-1">
 					<Link

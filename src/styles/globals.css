@@ -37,6 +37,34 @@
 	}
 }
 
+/* Prose-equivalent inline styling for scrollycoding prose (which sits in not-prose).
+   Mirrors the a/code rules from typography.css; :where() keeps specificity at 0 so
+   component classes (e.g. the base Link) still win, exactly like in real prose. */
+@utility scrolly-prose {
+	& :where(a) {
+		font-weight: 400;
+		text-decoration: underline;
+		text-underline-offset: 3px;
+	}
+
+	& :where(a:focus-visible) {
+		border-radius: var(--radius-sm);
+		outline: 2px solid var(--color-focus-ring);
+		outline-offset: 2px;
+	}
+
+	& :where(code:not(pre code)) {
+		font-size: 0.875rem;
+		line-height: 1.25rem;
+		font-weight: 700;
+		border-radius: 6px;
+		padding: calc(var(--spacing) * 0.5) calc(var(--spacing) * 1.5);
+		margin: calc(var(--spacing) * -0.5) 0px;
+		background: var(--color-bg-secondary);
+		box-shadow: 0 0 0 1px var(--color-border-secondary);
+	}
+}
+
 html,
 body {
 	font-family: var(--font-body);

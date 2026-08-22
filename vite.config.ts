@@ -11,6 +11,7 @@ import contentCollections from "@content-collections/vite";
 import rsc from "@vitejs/plugin-rsc";
 import mdx from "@mdx-js/rollup";
 import remarkFrontmatter from "remark-frontmatter";
+import remarkGfm from "remark-gfm";
 import remarkMdxFrontmatter from "remark-mdx-frontmatter";
 import { recmaCodeHike, remarkCodeHike, type CodeHikeConfig } from "codehike/mdx";
 
@@ -39,7 +40,7 @@ const config = defineConfig({
 		{
 			enforce: "pre",
 			...mdx({
-				remarkPlugins: [remarkFrontmatter, remarkMdxFrontmatter, [remarkCodeHike, chConfig]],
+				remarkPlugins: [remarkFrontmatter, remarkMdxFrontmatter, remarkGfm, [remarkCodeHike, chConfig]],
 				recmaPlugins: [[recmaCodeHike, chConfig]],
 			}),
 		},

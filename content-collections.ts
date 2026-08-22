@@ -12,7 +12,7 @@ const posts = defineCollection({
 		description: v.string(),
 		date: v.string(),
 		updated_at: v.nullish(v.string()),
-		tag: v.array(v.string()),
+		tags: v.array(v.string()),
 	}),
 	transform: (post) => ({
 		...post,

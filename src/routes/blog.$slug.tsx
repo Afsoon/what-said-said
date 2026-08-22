@@ -37,8 +37,8 @@ function PostPage() {
 		<div className="bg-primary">
 			<div className="mx-auto max-w-container px-4 py-16 md:px-8 md:py-24">
 				<div className="w-full max-w-3xl">
-					<BadgeGroup size="md" addonText="Tech" color="brand" theme="light" className="pr-3" iconTrailing={null}>
-						{article.tag[0]}
+					<BadgeGroup size="md" addonText="Tags" color="brand" theme="light" className="pr-3" iconTrailing={null}>
+						{article.tags.join(", ")}
 					</BadgeGroup>
 
 					<h1 className="mt-4 text-display-md font-semibold text-primary md:text-display-lg">{article.title}</h1>
