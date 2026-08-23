@@ -635,11 +635,12 @@ If you have made it this far, one question remains: is it fast enough? The demo 
 - **15 Files**: Each file runs in its own worker thread.
 - **226 Tests**: Each test fetches a ready database and hands it back on completion.
 
-| Machine                             | Suite           | Time                   |
-| ----------------------------------- | --------------- | ---------------------- |
-| M1 Pro MacBook Pro, 32GB            | demo, 226 tests | ~10s                   |
-| GitHub Actions, 1 shard of 3 shards | demo            | ~12s                   |
-| M4 Pro MacBook Pro, 24GB (`$JOB`)   | 317 tests       | ~7.4s warm, ~9.9s cold |
+| Machine                                          | Suite           | Time                   |
+| ------------------------------------------------ | --------------- | ---------------------- |
+| M1 Pro MacBook Pro, 32GB                         | demo, 226 tests | ~7.15s                 |
+| M1 Pro MacBook Pro, 32GB recreating the database | demo, 226 tests | ~10s                   |
+| GitHub Actions, 1 shard of 3 shards              | demo            | ~12s                   |
+| M4 Pro MacBook Pro, 24GB (`$JOB`)                | 317 tests       | ~7.4s warm, ~9.9s cold |
 
 Some will argue that these numbers aren't acceptable, because mocks are faster. True, and speed is its major drawback. But with a long test suite, you will run a subset of tests. Here we are exchanging time in favour of safety, especially in this era of LLMs generating code. I'd rather lose a few seconds than getting paged because of a bug the mocks never covered and E2E never reached.
 
