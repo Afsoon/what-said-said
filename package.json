@@ -28,7 +28,7 @@
 		"@tanstack/react-router": "latest",
 		"@tanstack/react-router-devtools": "latest",
 		"@tanstack/react-start": "latest",
-		"@untitledui/icons": "^0.0.22",
+		"@untitledui/icons": "^0.0.23",
 		"codehike": "^1.1.0",
 		"react": "^19.2.8",
 		"react-aria-components": "^1.20.0",
